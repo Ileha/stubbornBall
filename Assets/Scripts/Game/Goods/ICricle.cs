@@ -6,12 +6,14 @@ public class ICricle : GameElement {
 	private Vector3 StartPosition;
 	private Vector3 scale;
 	private Quaternion rotation;
+	private Collider2D CircleCollider;
 
 	void Awake() {
 		app.OnPlay += Play;
 		app.OnRestart += reset;
 		app.OnShaking += shaking;
 
+		CircleCollider = GetComponent<Collider2D>();
 		rigidbody = GetComponent<Rigidbody2D>();
 		StartPosition = transform.position;
 		scale = transform.localScale;
@@ -31,6 +33,7 @@ public class ICricle : GameElement {
 		transform.position = StartPosition;
 		transform.localScale = scale;
 		transform.rotation = rotation;
+		CircleCollider.enabled = true;
 		if (rigidbody.bodyType != RigidbodyType2D.Static) {
 			rigidbody.velocity = Vector2.zero;
 			rigidbody.angularVelocity = 0;

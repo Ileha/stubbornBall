@@ -13,6 +13,11 @@ public delegate void OnInputEvent(Vector3 direction);
 
 public class SceneSingleton : MonoBehaviour
 {
+	private enum GameState { 
+		Play,
+		Draw
+	}
+
 	public DrawLine lineDrawer;
 
 	public ICricle Cricle;
@@ -33,6 +38,7 @@ public class SceneSingleton : MonoBehaviour
 	private Acceleration acceleration;
 	private float maxTime = 0.25f;
 	private bool isExecute = false;
+	private GameState state = GameState.Draw;
 
 	void Start() {
 		Subscribe(lineDrawer);
@@ -143,11 +149,19 @@ public class SceneSingleton : MonoBehaviour
 	}
 
 	public void Play() {
+		if (state != GameState.Draw) { return; }
+
+		state = GameState.Play;
+
 		Unsubscribe(lineDrawer);
 		if (OnPlay != null) { OnPlay(); }
 	}
 
 	public void Restart() {
+		if (state != GameState.Play) { return; }
+
+		state = GameState.Draw;
+
 		Subscribe(lineDrawer);
 		Singleton.Instanse.AdSettings.ShowBanner(BannerPosition.TOP_CENTER);
 
@@ -167,6 +181,10 @@ public class SceneSingleton : MonoBehaviour
 
 	public void IncreaseStar() {
 		StarView.AddStar();
+	}
+
+	public bool IsCircle(GameObject player) {
+		return player == Cricle.gameObject;
 	}
 
 	public void Finish(GameObject player) {

@@ -23,7 +23,7 @@ public class BlackHole : GameElement {
 		rigidbody.angularVelocity = 0;
 		rigidbody.bodyType = RigidbodyType2D.Kinematic;
 		rigidbody.transform.position = new Vector3(rigidbody.transform.position.x, rigidbody.transform.position.y, transform.position.z-1);
-
+		rigidbody.GetComponent<Collider2D>().enabled = false;
 
 		while (targetTransform.localScale != Vector3.zero) {
 			targetTransform.localScale = Vector3.Lerp(targetTransform.localScale, Vector3.zero, Time.deltaTime);
