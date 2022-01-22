@@ -46,13 +46,16 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.unity.uiextensions": "https://bitbucket.org/UnityUIExtensions/unity-ui-extensions.git#release",
+    "com.coffee.ui-effect": "4.0.0-preview.9"
   },
   "scopedRegistries": [
     {
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
       "scopes": [
+        "com.coffee.ui-effect",
         "com.coffee.upm-git-extension",
         "com.cysharp.unitask",
         "com.grashaar.uiman-textmeshpro",

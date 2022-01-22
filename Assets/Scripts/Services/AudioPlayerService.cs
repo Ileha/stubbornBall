@@ -14,6 +14,7 @@ public class AudioPlayerService : IInitializable, IDisposable
 	private IEnumerator<AudioClip> _clips;
 	private CancellationTokenSource _cancellation;
 	private readonly CompositeDisposable _compositeDisposable = new CompositeDisposable();
+	private GameObject _playerGO;
 
 	public void SetClips(IEnumerable<AudioClip> clips) 
 	{
@@ -39,9 +40,9 @@ public class AudioPlayerService : IInitializable, IDisposable
 
 	public void Initialize()
 	{
-		GameObject result = new GameObject("AudioPlayer", typeof(AudioSource));
-		UnityEngine.Object.DontDestroyOnLoad(result.gameObject);
-		_source = result.GetComponent<AudioSource>();
+		_playerGO = new GameObject("AudioPlayer", typeof(AudioSource));
+		UnityEngine.Object.DontDestroyOnLoad(_playerGO.gameObject);
+		_source = _playerGO.GetComponent<AudioSource>();
 		_source.playOnAwake = false;
 		Volume.Value = _source.volume;
 		Volume
@@ -52,5 +53,6 @@ public class AudioPlayerService : IInitializable, IDisposable
 	public void Dispose()
 	{
 		_compositeDisposable?.Dispose();
+		UnityEngine.Object.Destroy(_playerGO);
 	}
 }
