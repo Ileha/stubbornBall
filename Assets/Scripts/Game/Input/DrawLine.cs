@@ -1,19 +1,24 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
+using Game.Goods.Abstract;
 
-public class DrawLine : GameElement, Iinput {
+public class DrawLine : AbstractLevelComponent, Iinput 
+{
 	public const float THICKNESS = 0.05f;
 
-	public Toggle draw;
-	public Toggle clear;
+	public Material LineMaterial => lineMaterial;
+
+	[SerializeField] private Toggle draw;
+	[SerializeField] private Toggle clear;
+	[SerializeField] private Material lineMaterial;
 
 	private Iinput drawSimpleLine;
 	private Iinput clearLine;
 
 	private Iinput currentInput;
 
-	void Awake() {
+	void Awake() 
+	{
 		drawSimpleLine = new DrawSimpleLine(this);
 		clearLine = new LineClearer(this);
 
@@ -46,11 +51,12 @@ public class DrawLine : GameElement, Iinput {
 	}
 }
 
-class DrawSimpleLine : Iinput {
+class DrawSimpleLine : Iinput 
+{
 	private LineComposer CurrentComposer;
-	private GameElement drawer;
+	private DrawLine drawer;
 
-	public DrawSimpleLine(GameElement drawer) {
+	public DrawSimpleLine(DrawLine drawer) {
 		this.drawer = drawer;
 	}
 
@@ -68,26 +74,27 @@ class DrawSimpleLine : Iinput {
 	}
 
 	public void OnStart(Vector3 ScreenPosition) {
-		if (!drawer.app.CanDraw(ScreenPosition)) { return; } //TODO may remake
+		if (!drawer.levelDataModel.CanDraw(ScreenPosition)) { return; } //TODO may remake
 		Vector3 position = Camera.main.ScreenToWorldPoint(ScreenPosition);
 		position.z = 0;
 		CurrentComposer = LineComposer.GetLine("line",
 											   position,
 											   DrawLine.THICKNESS,
-											   Singleton.Instanse.LineMaterial
+											   drawer.LineMaterial
 											  );
 	}
 }
-class LineClearer : Iinput {
-	private GameElement drawer;
+class LineClearer : Iinput 
+{
+	private AbstractLevelComponent drawer;
 
-	public LineClearer(GameElement drawer) {
+	public LineClearer(AbstractLevelComponent drawer) {
 		this.drawer = drawer;
 	}
 
 	public void OnEnd(Vector3 ScreenPosition) {}
 	public void OnMove(Vector3 ScreenPosition) {
-		if (!drawer.app.CanDraw(ScreenPosition)) { return; } //TODO may remake
+		if (!drawer.levelDataModel.CanDraw(ScreenPosition)) { return; } //TODO may remake
 		Collider2D[] colls = Physics2D.OverlapCircleAll(Camera.main.ScreenToWorldPoint(ScreenPosition),
 														DrawLine.THICKNESS
 														);

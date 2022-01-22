@@ -1,7 +1,10 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+﻿using Services;
+using TMPro;
+using UnityEngine;
 using UnityEngine.Advertisements;
+using UnityEngine.SceneManagement;
+using Zenject;
+using UniRx;
 
 public class MainUI : MonoBehaviour
 {
@@ -9,19 +12,22 @@ public class MainUI : MonoBehaviour
 	public Page Levels;
 	public Page Settings;
 
-	public Text text;
+	public TextMeshProUGUI text;
+	[SerializeField] private CanvasGroup _canvasGroup;
+	
+	[Inject] private readonly SavesService _data;
+	[Inject] private readonly AdService _adService;
+	[Inject] private readonly LevelService levelService;
 
-	//public GraphicRaycaster gr;
-
-	void Start() {
+	void Start() 
+	{
 		text.text = string.Format("v {0}", Application.version);
-		if (Singleton.Instanse.SceneInformation != null && Singleton.Instanse.SceneInformation is IMainUIInformation) {
-			(Singleton.Instanse.SceneInformation as IMainUIInformation).Handle(this);
-		}
-		else {
-			ShowMain();
-		}
-		Singleton.Instanse.AdSettings.ShowBanner(BannerPosition.TOP_CENTER);
+		levelService
+			.CurrentLevel
+			.Subscribe(OnLevelChange)
+			.AddTo(this);
+		
+		_adService.ShowBanner(BannerPosition.TOP_CENTER);
 	}
 
 	public void ShowMain() {
@@ -36,16 +42,19 @@ public class MainUI : MonoBehaviour
 		Settings.transform.SetAsLastSibling();
 	}
 
-	public Level[] GetAvailableLevels() {
-		return Singleton.Instanse.Data.GetAllLevels();
+	public Level[] GetAvailableLevels() 
+	{
+		return _data.GetAllLevels();
 	}
 
-	public LevelIcon GetLevelIcon() {
-		return Instantiate(Singleton.Instanse.LevelIcon);
+	public void LoadLevel(Level level) 
+	{
+		levelService.SetLevel(level);
 	}
 
-	public void LoadLevel(Level level) {
-		Singleton.Instanse.SceneInformation = new LevelInformation(level);
-		SceneManager.LoadScene(level.SceneNumber, LoadSceneMode.Single);
+	private void OnLevelChange(Level level)
+	{
+		_canvasGroup.alpha = level == default ? 1 : 0;
+		_canvasGroup.blocksRaycasts = level == default;
 	}
 }

@@ -1,17 +1,28 @@
-﻿using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
-public class SettingsPage : Page {
+public class SettingsPage : Page 
+{
 	public Button Back;
 	public Slider volume;
+	
+	[Inject] private readonly AudioPlayerService audioPlayerService;
 
-	void Start() {
-		Back.onClick.AddListener(() => app.ShowMain());
-		volume.value = AudioPlayer.CurrentAudioPlayer.Volume;
-		volume.onValueChanged.AddListener(
-			(val) => {
-				AudioPlayer.CurrentAudioPlayer.Volume = val;
-			}
-		);
+	void Start() 
+	{
+		Back.onClick.AddListener(() => MainUi.ShowMain());
+		volume.value = audioPlayerService.Volume.Value;
+
+		volume
+			.onValueChanged
+			.AsObservable()
+			.Subscribe(val =>
+			{
+				audioPlayerService.Volume.Value = val;
+			})
+			.AddTo(this);
 	}
 }
