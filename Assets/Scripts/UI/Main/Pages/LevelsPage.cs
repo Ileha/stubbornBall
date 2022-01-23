@@ -43,7 +43,7 @@ public class LevelsPage : Page
         {
             foreach (var levelIcon in previous)
             {
-                Destroy(levelIcon.gameObject);
+                levelIcon.Dispose();
             }
         }
 

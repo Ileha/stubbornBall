@@ -23,6 +23,7 @@ public class LevelDataModel : MonoBehaviour
 
     [Inject] public readonly MainCircle Cricle;
     public IReadOnlyReactiveProperty<int> StarCount => _starCount;
+    public bool IsNextLevelAvailable => HasNextLevel(out var next);
 
     private List<Iinput> InputSubscribers = new List<Iinput>();
     private List<RaycastResult> raycastResult = new List<RaycastResult>();

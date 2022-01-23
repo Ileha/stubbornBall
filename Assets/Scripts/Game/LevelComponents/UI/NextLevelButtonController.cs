@@ -14,6 +14,12 @@ namespace Game.LevelComponents.UI
 
         private void Awake()
         {
+            if (!levelDataModel.IsNextLevelAvailable)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+            
             button
                 .onClick
                 .AsObservable()
