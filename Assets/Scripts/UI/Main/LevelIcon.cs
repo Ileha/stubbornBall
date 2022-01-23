@@ -28,8 +28,6 @@ public class LevelIcon : MonoBehaviour
 			.AsObservable()
 			.Subscribe(x => OnSelect())
 			.AddTo(this);
-		
-		SetLevelActive(true);
 	}
 
 	public void SetLevelActive(bool active) 

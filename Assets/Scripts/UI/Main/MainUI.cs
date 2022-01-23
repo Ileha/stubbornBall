@@ -1,60 +1,77 @@
-﻿using Services;
+﻿using System;
+using Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Advertisements;
-using UnityEngine.SceneManagement;
 using Zenject;
 using UniRx;
 
 public class MainUI : MonoBehaviour
 {
-	public Page Main;
-	public Page Levels;
-	public Page Settings;
+    public IReadOnlyReactiveProperty<Page> CurrentPage
+        => Observable.CombineLatest(
+                _currentPage,
+                levelService.CurrentLevel,
+                (page, level) => (page, level))
+            .Select(combination => combination.level != default ? default : combination.page)
+            .ToReadOnlyReactiveProperty();
 
-	public TextMeshProUGUI text;
-	[SerializeField] private CanvasGroup _canvasGroup;
-	
-	[Inject] private readonly SavesService _data;
-	[Inject] private readonly AdService _adService;
-	[Inject] private readonly LevelService levelService;
+    [SerializeField] private Page Main;
+    [SerializeField] private Page Levels;
+    [SerializeField] private Page Settings;
 
-	void Start() 
-	{
-		text.text = string.Format("v {0}", Application.version);
-		levelService
-			.CurrentLevel
-			.Subscribe(OnLevelChange)
-			.AddTo(this);
-		
-		_adService.ShowBanner(BannerPosition.TOP_CENTER);
-	}
+    [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private CanvasGroup _canvasGroup;
 
-	public void ShowMain() {
-		Main.transform.SetAsLastSibling();
-	}
+    [Inject] private readonly SavesService _data;
+    [Inject] private readonly AdService _adService;
+    [Inject] private readonly LevelService levelService;
+    private readonly IReactiveProperty<Page> _currentPage = new ReactiveProperty<Page>();
 
-	public void ShowLevels() {
-		Levels.transform.SetAsLastSibling();
-	}
+    private void Awake()
+    {
+        _currentPage.Value = Main;
+    }
 
-	public void ShowSettings() {
-		Settings.transform.SetAsLastSibling();
-	}
+    void Start()
+    {
+        text.text = string.Format("v {0}", Application.version);
+        levelService
+            .CurrentLevel
+            .Subscribe(OnLevelChange)
+            .AddTo(this);
 
-	public Level[] GetAvailableLevels() 
-	{
-		return _data.GetAllLevels();
-	}
+        _adService.ShowBanner(BannerPosition.TOP_CENTER);
+    }
 
-	public void LoadLevel(Level level) 
-	{
-		levelService.SetLevel(level);
-	}
+    public void ShowMain()
+    {
+        _currentPage.Value = Main;
+    }
 
-	private void OnLevelChange(Level level)
-	{
-		_canvasGroup.alpha = level == default ? 1 : 0;
-		_canvasGroup.blocksRaycasts = level == default;
-	}
+    public void ShowLevels()
+    {
+        _currentPage.Value = Levels;
+    }
+
+    public void ShowSettings()
+    {
+        _currentPage.Value = Settings;
+    }
+
+    public Level[] GetAvailableLevels()
+    {
+        return _data.GetAllLevels();
+    }
+
+    public void LoadLevel(Level level)
+    {
+        levelService.SetLevel(level);
+    }
+
+    private void OnLevelChange(Level level)
+    {
+        _canvasGroup.alpha = level == default ? 1 : 0;
+        _canvasGroup.blocksRaycasts = level == default;
+    }
 }

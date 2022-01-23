@@ -11,8 +11,9 @@ public class SettingsPage : Page
 	
 	[Inject] private readonly AudioPlayerService audioPlayerService;
 
-	void Start() 
+	protected override void Start()
 	{
+		base.Start();
 		Back.onClick.AddListener(() => MainUi.ShowMain());
 		volume.value = audioPlayerService.Volume.Value;
 

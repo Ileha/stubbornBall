@@ -87,7 +87,6 @@ public class SavesService : IInitializable, IDisposable
 		{
 			try 
 			{
-				//Debug.Log(path);
 				data = (ProgramSaveData)_formatter.Deserialize(fs);
 			}
 			catch (Exception err) 

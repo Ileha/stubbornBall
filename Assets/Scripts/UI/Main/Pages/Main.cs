@@ -7,7 +7,9 @@ public class Main : Page
 	public Button Levels;
 	public Button Settings;
 
-	void Start() {
+	protected override void Start()
+	{
+		base.Start();
 		Levels
 			.onClick
 			.AsObservable()
