@@ -11,8 +11,6 @@ public class LevelsPage : Page
     public Transform IconRoot;
     public Button Back;
 
-    // private LevelIcon[] icons;
-
     [Inject] private readonly LevelIcon.Factory _levelIconFactory;
 
     protected override void Start()
@@ -26,16 +24,6 @@ public class LevelsPage : Page
             .CombineWithPrevious((previous, next) => (previous, next))
             .Subscribe(combination => OnChangeLevelViews(combination.previous, combination.next))
             .AddTo(this);
-
-        // Level[] levels = MainUi.GetAvailableLevels();
-        // icons = new LevelIcon[levels.Length];
-        // for (int i = 0; i < levels.Length; i++)
-        // {
-        //     icons[i] = _levelIconFactory.Create(levels[i]);
-        //     icons[i].transform.SetParent(IconRoot);
-        // }
-        //
-        // CalculateLastOpenLevel();
     }
 
     private IEnumerable<LevelIcon> CreateViews()
@@ -84,32 +72,5 @@ public class LevelsPage : Page
                 break;
             }
         }
-        
-        // int lastPassLevel = icons.Count() - 1;
-        
-
-        // int lastPassLevel = icons.Count() - 1;
-        //
-        // for (; lastPassLevel >= 0; lastPassLevel--)
-        // {
-        //     if (icons[lastPassLevel].CurrentLevel.passed)
-        //     {
-        //         break;
-        //     }
-        // }
-        //
-        // int lastOpenLevel = lastPassLevel + 1;
-        //
-        // for (int i = 0; i < icons.Length; i++)
-        // {
-        //     if (i <= lastOpenLevel)
-        //     {
-        //         icons[i].SetLevelActive(true);
-        //     }
-        //     else
-        //     {
-        //         icons[i].SetLevelActive(false);
-        //     }
-        // }
     }
 }

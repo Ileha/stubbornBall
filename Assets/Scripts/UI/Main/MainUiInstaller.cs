@@ -10,6 +10,8 @@ public class MainUiInstaller : MonoInstaller
     {
         Container
             .BindFactory<Level, LevelIcon, LevelIcon.Factory>()
-            .FromComponentInNewPrefab(_levelIcon);
+            .FromMonoPoolableMemoryPool(
+                x => x.FromComponentInNewPrefab(_levelIcon)
+            );
     }
 }

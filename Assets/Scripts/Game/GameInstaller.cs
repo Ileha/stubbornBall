@@ -1,4 +1,4 @@
-using UnityEngine;
+using Services;
 using Zenject;
 
 public class GameInstaller : MonoInstaller
@@ -7,6 +7,11 @@ public class GameInstaller : MonoInstaller
     {
         Container
             .Bind<MainUI>()
+            .FromComponentInHierarchy()
+            .AsSingle();
+
+        Container
+            .Bind<InvisibleElementsSystem>()
             .FromComponentInHierarchy()
             .AsSingle();
     }
