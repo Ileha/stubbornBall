@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
 using Services;
 using TMPro;
 using UnityEngine;
@@ -41,9 +41,12 @@ public class MainUI : MonoBehaviour
             .Subscribe(OnLevelChange)
             .AddTo(this);
 
-        _adService.ShowBanner(BannerPosition.TOP_CENTER);
+        CurrentPage
+            .Where(page => page != default)
+            .Subscribe(page => _adService.ShowBanner(BannerPosition.TOP_CENTER).Forget())
+            .AddTo(this);
     }
-
+    
     public void ShowMain()
     {
         _currentPage.Value = Main;

@@ -1,4 +1,3 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Advertisements;
@@ -6,7 +5,7 @@ using Zenject;
 
 namespace Services
 {
-    public class AdService : IInitializable 
+    public class AdService : IInitializable
     {
         private int addCount = 0;
 
@@ -23,18 +22,19 @@ namespace Services
         	return Advertisement.isInitialized;
         }
     
-        public bool HasNextAd() 
+        public bool HasNextAd()
         {
-	        addCount = (addCount + 1) % (AdData.MaxAdFrequency-_adData.AdFrequency);
-        	Debug.Log(addCount);
-        	return addCount == ((AdData.MaxAdFrequency - _adData.AdFrequency)-1);
+	        var localMax = (AdData.MaxAdFrequency - _adData.AdFrequency)+1;
+	        addCount = (addCount + 1) % localMax;
+	        Debug.Log($"Advertisement: {addCount}/{localMax}");
+	        return addCount == 0;
         }
     
         public async UniTask ShowBanner(BannerPosition position) 
         {
         	Advertisement.Banner.SetPosition(position);
         	await ShowBannerWhenReady(_adData.BannerId);
-        	Debug.Log("show banner");
+        	Debug.Log("Advertisement: show banner");
         }
     
         private async UniTask ShowBannerWhenReady(string placementId)
@@ -46,13 +46,13 @@ namespace Services
         public async UniTask ShowVideo() 
         {
         	await ShowAdWhenReady(_adData.Video);
-        	Debug.Log("show video");
+        	Debug.Log("Advertisement: show video");
         }
     
         public async UniTask<ShowResult> ShowRewardedVideo() 
         {
         	var result = await ShowAdWhenReady(_adData.RewardedVideo);
-        	Debug.Log("show rewarded video");
+        	Debug.Log("Advertisement: show rewarded video");
         	return result;
         }
     

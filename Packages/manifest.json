@@ -1,11 +1,13 @@
 {
   "dependencies": {
+    "com.coffee.ui-effect": "4.0.0-preview.9",
     "com.coffee.upm-git-extension": "2.0.0-preview.1",
     "com.cysharp.unitask": "2.2.5",
     "com.grashaar.uiman-textmeshpro": "1.4.1",
     "com.neuecc.unirx": "7.1.0",
     "com.svermeulen.extenject": "https://github.com/modesttree/Zenject.git?path=UnityProject/Assets/Plugins/Zenject/#9.2.0",
     "com.unity.2d.sprite": "1.0.0",
+    "com.unity.ads": "3.7.5",
     "com.unity.collab-proxy": "1.5.7",
     "com.unity.device-simulator": "3.0.3-preview",
     "com.unity.ide.rider": "2.0.7",
@@ -15,6 +17,7 @@
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.4.8",
     "com.unity.ugui": "1.0.0",
+    "com.unity.uiextensions": "https://bitbucket.org/UnityUIExtensions/unity-ui-extensions.git#release",
     "com.yasirkula.ingamedebugconsole": "1.5.3",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
@@ -46,9 +49,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.unity.uiextensions": "https://bitbucket.org/UnityUIExtensions/unity-ui-extensions.git#release",
-    "com.coffee.ui-effect": "4.0.0-preview.9"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {
