@@ -1,10 +1,14 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Collections.Generic;
+using CommonData;
+using Cysharp.Threading.Tasks;
 using Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Advertisements;
 using Zenject;
 using UniRx;
+using UnityEngine.Analytics;
+using UnuGames;
 
 public class MainUI : MonoBehaviour
 {
@@ -44,6 +48,18 @@ public class MainUI : MonoBehaviour
         CurrentPage
             .Where(page => page != default)
             .Subscribe(page => _adService.ShowBanner(BannerPosition.TOP_CENTER).Forget())
+            .AddTo(this);
+        
+        CurrentPage
+            .Where(page => page != default)
+            .Subscribe(page => Analytics
+                .CustomEvent(
+                    Constants.MainUIPageOpened, 
+                    new Dictionary<string, object>()
+                    {
+                        { "name", page.GetCachedType().Name }
+                    })
+            )
             .AddTo(this);
     }
     

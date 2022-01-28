@@ -1,6 +1,10 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using CommonData;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.UI;
 using Zenject;
 
@@ -23,6 +27,22 @@ public class SettingsPage : Page
 			.Subscribe(val =>
 			{
 				audioPlayerService.Volume.Value = val;
+			})
+			.AddTo(this);
+		
+		volume
+			.onValueChanged
+			.AsObservable()
+			.Throttle(TimeSpan.FromSeconds(10))
+			.Subscribe(val =>
+			{
+				Analytics.CustomEvent(
+					Constants.VolumeValueChanged,
+					new Dictionary<string, object>()
+					{
+						{ "value", val }
+					}
+				);
 			})
 			.AddTo(this);
 	}

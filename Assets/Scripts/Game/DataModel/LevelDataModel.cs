@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using CommonData;
 using Game.LevelComponents.Environment;
 using Services;
 using UniRx;
 using UnityEngine.EventSystems;
 using UnityEngine.Advertisements;
+using UnityEngine.Analytics;
 using Zenject;
 
 public class LevelDataModel : MonoBehaviour
@@ -49,7 +51,26 @@ public class LevelDataModel : MonoBehaviour
         _endOfLevel.gameObject.SetActive(false);
         pointData = new PointerEventData(EventSystem.current);
 
-#if UNITY_ANDROID || UNITY_IOS
+        Observable
+            .FromEvent<Action<Vector3>, Vector3>
+            (
+                handler => handler.Invoke,
+                add => OnShaking += add,
+                remove => OnShaking += remove
+            )
+            .Subscribe(direction =>
+            {
+                Analytics.CustomEvent(
+                    Constants.ShakeDetection,
+                    new Dictionary<string, object>()
+                    {
+                        { "magnitude", direction.magnitude }
+                    }
+                );
+            })
+            .AddTo(this);
+
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
         acceleration = new Acceleration();
 #endif
     }
@@ -200,6 +221,16 @@ public class LevelDataModel : MonoBehaviour
 
         Subscribe(_lineDrawer);
         _adService.ShowBanner(BannerPosition.TOP_CENTER);
+        
+        Analytics.CustomEvent(
+            Constants.LevelRestarted,
+            new Dictionary<string, object>()
+            {
+                { "level", _level.SceneNumber },
+                { "stars", _starCount.Value },
+                { "passed", _level.passed }
+            }
+        );
 
         _endOfLevel.gameObject.SetActive(false);
         _starCount.Value = 0;
@@ -233,17 +264,33 @@ public class LevelDataModel : MonoBehaviour
             Cricle.gameObject.SetActive(false);
 
             _data.SetLevelStar(_level, _starCount.Value);
+            
+            Analytics.CustomEvent(
+                Constants.LevelPassed,
+                new Dictionary<string, object>()
+                {
+                    { "level", _level.SceneNumber },
+                    { "stars", _starCount.Value },
+                    { "passed", _level.passed }
+                }
+            );
 
-            Level result = null;
-            if (HasNextLevel(out result))
+            if (HasNextLevel(out var result))
             {
-                // _endOfLevel.Enable(_starCount.Value, GoToNextLevel, Restart, ToMeny);
                 _endOfLevel.gameObject.SetActive(true);
             }
             else
             {
-                // _endOfLevel.Enable(_starCount.Value, null, Restart, ToMeny);
                 _endOfLevel.gameObject.SetActive(true);
+                Analytics.CustomEvent(
+                    Constants.LastLevelPassed,
+                    new Dictionary<string, object>()
+                    {
+                        { "level", _level.SceneNumber },
+                        { "stars", _starCount.Value },
+                        { "passed", _level.passed }
+                    }
+                );
             }
 
             await _adService.ShowBanner(BannerPosition.BOTTOM_CENTER);
@@ -283,6 +330,16 @@ public class LevelDataModel : MonoBehaviour
         if (result == ShowResult.Finished)
         {
             _data.SetLevelStar(_level, 0);
+            
+            Analytics.CustomEvent(
+                Constants.LevelSkipped,
+                new Dictionary<string, object>()
+                {
+                    { "level", _level.SceneNumber },
+                    { "stars", _starCount.Value },
+                    { "passed", _level.passed }
+                }
+            );
 
             if (HasNextLevel(out var nextLevel))
             {

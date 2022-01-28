@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using CommonData;
 using Game.Goods.Abstract;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 public class BigGun : AbstractLevelComponent, Iinput 
 {
@@ -89,6 +91,15 @@ public class BigGun : AbstractLevelComponent, Iinput
 
 	public void OnStart(Vector3 ScreenPosition) {
 		if (!levelDataModel.CanDraw(ScreenPosition)) { return; }
+		
+		Analytics.CustomEvent(
+			Constants.IIinputEvent,
+			new Dictionary<string, object>()
+			{
+				{ "name", nameof(BigGun) }
+			}
+		);
+		
 		animator.SetTrigger("shoot");
 		levelDataModel.Unsubscribe(this);
 		StopCoroutine(currentRotation);

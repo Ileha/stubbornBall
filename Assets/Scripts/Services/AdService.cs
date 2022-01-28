@@ -1,6 +1,10 @@
+using System.Collections.Generic;
+using CommonData;
 using Cysharp.Threading.Tasks;
+using Extensions;
 using UnityEngine;
 using UnityEngine.Advertisements;
+using UnityEngine.Analytics;
 using Zenject;
 
 namespace Services
@@ -45,13 +49,17 @@ namespace Services
     
         public async UniTask ShowVideo() 
         {
-        	await ShowAdWhenReady(_adData.Video);
+	        var id = AnalyticsExtensions.BeginEvent(Constants.RegularVideo);
+	        await ShowAdWhenReady(_adData.Video);
+	        AnalyticsExtensions.CompleteEvent(id);
         	Debug.Log("Advertisement: show video");
         }
     
-        public async UniTask<ShowResult> ShowRewardedVideo() 
+        public async UniTask<ShowResult> ShowRewardedVideo()
         {
+	        var id = AnalyticsExtensions.BeginEvent(Constants.RewardedVideo);
         	var result = await ShowAdWhenReady(_adData.RewardedVideo);
+            AnalyticsExtensions.CompleteEvent(id);
         	Debug.Log("Advertisement: show rewarded video");
         	return result;
         }
