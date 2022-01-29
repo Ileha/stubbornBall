@@ -42,7 +42,7 @@ namespace Extensions
             childDeltaPos = Vector2.Scale(childDeltaPos, scrollConstrains);
 
             return DOTween.Sequence()
-                .Append(instance.content.DOAnchorPos(instance.content.anchoredPosition + childDeltaPos, duration));
+                .Append(instance.content.DOMove(instance.content.position + (Vector3)childDeltaPos, duration));
         }
     }
 }
