@@ -1,28 +1,38 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
 using Extensions;
 using UniRx;
-using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 public class LevelsPage : Page
 {
-    public Transform IconRoot;
-    public Button Back;
+    public ScrollRect scrollRect;
+    public Button back;
 
     [Inject] private readonly LevelIcon.Factory _levelIconFactory;
 
     protected override void Start()
     {
         base.Start();
-        Back.onClick.AddListener(MainUi.ShowMain);
+        back.onClick.AddListener(MainUi.ShowMain);
 
         CurrentPageState
             .Where(state => state == PageState.Open)
             .Select(state => CreateViews())
             .CombineWithPrevious((previous, next) => (previous, next))
-            .Subscribe(combination => OnChangeLevelViews(combination.previous, combination.next))
+            .Select(combination => OnChangeLevelViews(combination.previous, combination.next))
+            .Select(icon => RxExtensions.FromAsync(async token =>
+            {
+                if (icon != default)
+                {
+                    await scrollRect
+                        .GetSnapToPositionToBringChildIntoView(icon.RectTransform, 0.6f)
+                        .ToUniTask(cancellationToken: token);
+                }
+            }))
+            .Switch()
+            .Subscribe()
             .AddTo(this);
     }
 
@@ -37,7 +47,7 @@ public class LevelsPage : Page
         return icons;
     }
 
-    private void OnChangeLevelViews(IEnumerable<LevelIcon> previous, IEnumerable<LevelIcon> next)
+    private LevelIcon OnChangeLevelViews(IEnumerable<LevelIcon> previous, IEnumerable<LevelIcon> next)
     {
         if (previous != null)
         {
@@ -51,14 +61,16 @@ public class LevelsPage : Page
         {
             foreach (var levelIcon in next)
             {
-                levelIcon.transform.SetParent(IconRoot);
+                levelIcon.transform.SetParent(scrollRect.content);
             }
 
-            CalculateLastOpenLevel(next);
+            return CalculateLastOpenLevel(next);
         }
+
+        return default;
     }
 
-    private void CalculateLastOpenLevel(IEnumerable<LevelIcon> icons)
+    private LevelIcon CalculateLastOpenLevel(IEnumerable<LevelIcon> icons)
     {
         foreach (var icon in icons)
         {
@@ -69,8 +81,10 @@ public class LevelsPage : Page
             else
             {
                 icon.SetLevelActive(true);
-                break;
+                return icon;
             }
         }
+
+        return default;
     }
 }

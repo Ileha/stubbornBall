@@ -17,9 +17,22 @@ public class LevelIcon : MonoBehaviour, IPoolable<Level, IMemoryPool>, IDisposab
 	[Inject] private readonly InvisibleElementsSystem _invisibleElementsSystem;
 	
 	public Level CurrentLevel { get; private set; }
-	
+
+	public RectTransform RectTransform
+	{
+		get
+		{
+			if (_rectTransform == null)
+			{
+				_rectTransform = transform as RectTransform;
+			}
+			return _rectTransform;
+		}
+	}
+
 	private IMemoryPool _pool;
 	private CompositeDisposable _disposable;
+	private RectTransform _rectTransform;
 
 	public void SetLevelActive(bool active) 
 	{
