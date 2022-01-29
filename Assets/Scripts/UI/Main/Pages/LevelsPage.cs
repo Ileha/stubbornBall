@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Extensions;
 using UniRx;
@@ -72,19 +73,28 @@ public class LevelsPage : Page
 
     private LevelIcon CalculateLastOpenLevel(IEnumerable<LevelIcon> icons)
     {
+        LevelIcon levelIcon = default;
+        
         foreach (var icon in icons)
         {
-            if (icon.CurrentLevel.passed)
+            if (levelIcon == default)
             {
-                icon.SetLevelActive(true);
+                if (icon.CurrentLevel.passed)
+                {
+                    icon.SetLevelActive(true);
+                }
+                else
+                {
+                    icon.SetLevelActive(true);
+                    levelIcon = icon;
+                }
             }
             else
             {
-                icon.SetLevelActive(true);
-                return icon;
+                icon.SetLevelActive(false);
             }
         }
 
-        return default;
+        return levelIcon;
     }
 }
