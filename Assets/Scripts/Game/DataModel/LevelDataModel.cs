@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using CommonData;
+using Cysharp.Threading.Tasks;
 using Game.LevelComponents.Environment;
+using GoogleMobileAds.Api;
 using Services;
 using UniRx;
 using UnityEngine.EventSystems;
@@ -42,12 +44,13 @@ public class LevelDataModel : MonoBehaviour
     [Inject] private readonly Level _level;
     [Inject] private readonly DrawLine _lineDrawer;
     [Inject] private readonly EndOfLevel _endOfLevel;
+    [Inject] private readonly AdData _adData;
 
     void Start()
     {
         Subscribe(_lineDrawer);
 
-        _adService.ShowBanner(BannerPosition.TOP_CENTER);
+        _adService.ShowBanner(AdPosition.Top).Forget();
         _endOfLevel.gameObject.SetActive(false);
         pointData = new PointerEventData(EventSystem.current);
 
@@ -220,7 +223,7 @@ public class LevelDataModel : MonoBehaviour
         state = GameState.Draw;
 
         Subscribe(_lineDrawer);
-        _adService.ShowBanner(BannerPosition.TOP_CENTER);
+        _adService.ShowBanner(AdPosition.Top).Forget();
         
         Analytics.CustomEvent(
             Constants.LevelRestarted,
@@ -293,7 +296,7 @@ public class LevelDataModel : MonoBehaviour
                 );
             }
 
-            await _adService.ShowBanner(BannerPosition.BOTTOM_CENTER);
+            _adService.ShowBanner(AdPosition.Bottom).Forget();
         }
     }
 
@@ -315,19 +318,40 @@ public class LevelDataModel : MonoBehaviour
     {
         if (HasNextLevel(out var nextLevel))
         {
-            if (_adService.IsInitialized() && _adService.HasNextAd())
+            if (_adService.HasNextAd())
             {
-                await _adService.ShowVideo();
+                try
+                {
+                    await _adService.ShowVideo();
+                }
+                catch (AdService.AdsExceptionBase e)
+                {
+#if DEBUG
+                    Debug.LogWarning(e.Message);
+#endif
+                }
             }
-
+            
             _levelService.SetLevel(nextLevel);
         }
     }
 
     public async void SkipLevel()
     {
-        var result = await _adService.ShowRewardedVideo();
-        if (result == ShowResult.Finished)
+        Reward result = default;
+        try
+        {
+            result = await _adService.ShowRewardedVideo();
+        }
+        catch (AdService.AdsExceptionBase e)
+        {
+#if DEBUG
+            Debug.LogWarning(e.Message);
+#endif
+            return;
+        }
+        
+        if (_adData.SkipLevelRewardIdentity.Equals(result.Type) && result.Amount > 0)
         {
             _data.SetLevelStar(_level, 0);
             

@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using CommonData;
 using Cysharp.Threading.Tasks;
 using Extensions;
+using GoogleMobileAds.Api;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Advertisements;
 using UnityEngine.Analytics;
@@ -11,21 +14,219 @@ namespace Services
 {
     public class AdService : IInitializable
     {
-        private int addCount = 0;
+	    #region Exceptions
+
+	    public abstract class AdsExceptionBase : Exception
+	    {
+		    public AdsExceptionBase() : base()
+		    {
+		    }
+
+		    public AdsExceptionBase(string message) : base(message)
+		    {
+		    }
+	    }
+	    
+	    private class AdsException : AdsExceptionBase
+	    {
+		    public object Sender { get; }
+		    public AdErrorEventArgs Args { get; }
+
+		    public AdsException(object sender, AdErrorEventArgs args)
+		    {
+			    Sender = sender;
+			    Args = args;
+		    }
+
+		    public override string ToString()
+		    {
+			    return $"object: {Sender}: {Args.AdError.GetMessage()}";
+		    }
+	    }
+
+	    private class AdsNotLoaded : AdsExceptionBase
+	    {
+		    public AdsNotLoaded() : base("NotLoaded")
+		    {
+			    
+		    }
+		    
+		    public AdsNotLoaded(AdFailedToLoadEventArgs args) : base(args.LoadAdError.ToString())
+		    {
+			    
+		    }
+	    }
+	    
+	    #endregion
+
+	    #region Loading
+
+	    private interface IAdLoading
+	    {
+		    UniTask Load(AdRequest request);
+	    }
+
+	    private class RewardedAdLoading : IAdLoading
+	    {
+		    public RewardedAd Ad { get; }
+
+		    public RewardedAdLoading(RewardedAd ad)
+		    {
+			    Ad = ad;
+		    }
+
+		    public async UniTask Load(AdRequest request)
+		    {
+			    CompositeDisposable disposable = new CompositeDisposable();
+			    UniTaskCompletionSource completionSource = new UniTaskCompletionSource();
+	        
+			    try
+			    {
+				    Observable.FromEvent<EventHandler<EventArgs>, (object, EventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdLoaded += handler),
+						    (handler => Ad.OnAdLoaded -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetResult())
+					    .AddTo(disposable);
+				    
+				    Observable.FromEvent<EventHandler<AdFailedToLoadEventArgs>, (object, AdFailedToLoadEventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdFailedToLoad += handler),
+						    (handler => Ad.OnAdFailedToLoad -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetException(new AdsNotLoaded(data.Item2)))
+					    .AddTo(disposable);
+
+				    Ad.LoadAd(request);
+		        
+				    await completionSource.Task;
+			    }
+			    finally
+			    {
+				    disposable?.Dispose();
+			    }
+		    }
+	    }
+
+	    private class BannerViewLoading : IAdLoading
+	    {
+		    public BannerView Ad { get; }
+
+		    public BannerViewLoading(BannerView ad)
+		    {
+			    Ad = ad;
+		    }
+
+		    public async UniTask Load(AdRequest request)
+		    {
+			    CompositeDisposable disposable = new CompositeDisposable();
+			    UniTaskCompletionSource completionSource = new UniTaskCompletionSource();
+	        
+			    try
+			    {
+				    Observable.FromEvent<EventHandler<EventArgs>, (object, EventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdLoaded += handler),
+						    (handler => Ad.OnAdLoaded -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetResult())
+					    .AddTo(disposable);
+				    
+				    Observable.FromEvent<EventHandler<AdFailedToLoadEventArgs>, (object, AdFailedToLoadEventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdFailedToLoad += handler),
+						    (handler => Ad.OnAdFailedToLoad -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetException(new AdsNotLoaded(data.Item2)))
+					    .AddTo(disposable);
+
+				    Ad.LoadAd(request);
+		        
+				    await completionSource.Task;
+			    }
+			    finally
+			    {
+				    disposable?.Dispose();
+			    }
+		    }
+	    }
+	    
+	    private class InterstitialAdLoading : IAdLoading
+	    {
+		    public InterstitialAd Ad { get; }
+
+		    public InterstitialAdLoading(InterstitialAd ad)
+		    {
+			    Ad = ad;
+		    }
+
+		    public async UniTask Load(AdRequest request)
+		    {
+			    CompositeDisposable disposable = new CompositeDisposable();
+			    UniTaskCompletionSource completionSource = new UniTaskCompletionSource();
+	        
+			    try
+			    {
+				    Observable.FromEvent<EventHandler<EventArgs>, (object, EventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdLoaded += handler),
+						    (handler => Ad.OnAdLoaded -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetResult())
+					    .AddTo(disposable);
+				    
+				    Observable.FromEvent<EventHandler<AdFailedToLoadEventArgs>, (object, AdFailedToLoadEventArgs)>(
+						    (action => (obj, args) => action.Invoke((obj, args))),
+						    (handler => Ad.OnAdFailedToLoad += handler),
+						    (handler => Ad.OnAdFailedToLoad -= handler)
+					    )
+					    .First()
+					    .Subscribe(data => completionSource.TrySetException(new AdsNotLoaded(data.Item2)))
+					    .AddTo(disposable);
+
+				    Ad.LoadAd(request);
+		        
+				    await completionSource.Task;
+			    }
+			    finally
+			    {
+				    disposable?.Dispose();
+			    }
+		    }
+	    }
+	    
+	    #endregion
+	    
+	    private int addCount = 0;
 
         [Inject] private readonly AdData _adData;
+        private InitializationStatus _initializationStatus;
+
+        private InterstitialAd _interstitialAd;
+        private RewardedAd _rewardedAd;
+        private BannerView _bannerView;
+        private AdRequest _adRequest;
         
         public void Initialize()
         {
-	        Advertisement.debugMode = true;
-	        Advertisement.Initialize(_adData.GameId, _adData.TestMode);
+	        MobileAds.Initialize(status =>
+	        {
+		        _initializationStatus = status;
+		        _adRequest = new AdRequest.Builder().Build();
+	        });
         }
-    
-        public bool IsInitialized() 
+
+        public bool IsLoaded()
         {
-        	return Advertisement.isInitialized;
+	        return _initializationStatus != null;
         }
-    
+
         public bool HasNextAd()
         {
 	        var localMax = (AdData.MaxAdFrequency - _adData.AdFrequency)+1;
@@ -34,48 +235,153 @@ namespace Services
 	        return addCount == 0;
         }
     
-        public async UniTask ShowBanner(BannerPosition position) 
+        public async UniTask ShowBanner(AdPosition position) 
         {
-        	Advertisement.Banner.SetPosition(position);
-        	await ShowBannerWhenReady(_adData.BannerId);
-        	Debug.Log("Advertisement: show banner");
+	        if (!IsLoaded())
+	        {
+		        throw new AdsNotLoaded();
+	        }
+
+	        _bannerView?.Destroy();
+	        _bannerView = new BannerView(_adData.BannerId, AdSize.Banner, position);
+	        await new BannerViewLoading(_bannerView).Load(_adRequest);
+	        Debug.Log("Advertisement: show banner");
         }
-    
-        private async UniTask ShowBannerWhenReady(string placementId)
-        {
-        	await UniTask.WaitWhile(() => !Advertisement.IsReady(placementId));
-        	Advertisement.Banner.Show(placementId);
-        }
-    
+        
         public async UniTask ShowVideo() 
         {
+	        if (!IsLoaded())
+	        {
+		        throw new AdsNotLoaded();
+	        }
+	        
 	        var id = AnalyticsExtensions.BeginEvent(Constants.RegularVideo);
-	        await ShowAdWhenReady(_adData.Video);
-	        AnalyticsExtensions.CompleteEvent(id);
-        	Debug.Log("Advertisement: show video");
+	        try
+	        {
+		        _interstitialAd?.Destroy();
+		        _interstitialAd = new InterstitialAd(_adData.Video);
+		        await new InterstitialAdLoading(_interstitialAd).Load(_adRequest);
+		        await ShowInterstitialAd(_interstitialAd);
+	        }
+	        finally
+	        {
+		        AnalyticsExtensions.CompleteEvent(id);
+		        Debug.Log("Advertisement: show video");
+	        }
         }
     
-        public async UniTask<ShowResult> ShowRewardedVideo()
+        public async UniTask<Reward> ShowRewardedVideo()
         {
+	        if (!IsLoaded())
+	        {
+		        throw new AdsNotLoaded();
+	        }
+	        
 	        var id = AnalyticsExtensions.BeginEvent(Constants.RewardedVideo);
-        	var result = await ShowAdWhenReady(_adData.RewardedVideo);
-            AnalyticsExtensions.CompleteEvent(id);
-        	Debug.Log("Advertisement: show rewarded video");
-        	return result;
+	        try
+	        {
+		        _rewardedAd?.Destroy();
+		        _rewardedAd = new RewardedAd(_adData.RewardedVideo);
+		        await new RewardedAdLoading(_rewardedAd).Load(_adRequest);
+		        var result = await ShowRewardedAd(_rewardedAd);
+		        return result;
+	        }
+	        finally
+	        {
+		        AnalyticsExtensions.CompleteEvent(id);
+		        Debug.Log("Advertisement: show rewarded video");
+	        }
         }
-    
-        private async UniTask<ShowResult> ShowAdWhenReady(string placementId) 
-        {
-        	await UniTask.WaitWhile(() => !Advertisement.IsReady(placementId));
         
-        	UniTaskCompletionSource<ShowResult> completionSource = new UniTaskCompletionSource<ShowResult>();
-    
-        	Advertisement.Show(placementId, new ShowOptions() 
-        	{
-        		resultCallback = result => completionSource.TrySetResult(result)
-        	});
-    
-        	return await completionSource.Task;
+        private async UniTask<Reward> ShowRewardedAd(RewardedAd rewardedAd) 
+        {
+	        if (!rewardedAd.IsLoaded())
+	        {
+		        throw new AdsNotLoaded();
+	        }
+
+	        CompositeDisposable disposable = new CompositeDisposable();
+	        UniTaskCompletionSource<Reward> completionSource = new UniTaskCompletionSource<Reward>();
+	        
+	        try
+	        {
+		        Observable.FromEvent<EventHandler<EventArgs>, (object, EventArgs)>(
+				        (action => (obj, args) => action.Invoke((obj, args))),
+				        (handler => rewardedAd.OnAdClosed += handler),
+				        (handler => rewardedAd.OnAdClosed -= handler)
+			        )
+			        .First()
+			        .Subscribe(data => completionSource.TrySetResult(new Reward()))
+			        .AddTo(disposable);
+		        
+		        Observable.FromEvent<EventHandler<AdErrorEventArgs>, (object, AdErrorEventArgs)>(
+				        (action => (obj, args) => action.Invoke((obj, args))),
+				        (handler => rewardedAd.OnAdFailedToShow += handler),
+				        (handler => rewardedAd.OnAdFailedToShow -= handler)
+			        )
+			        .First()
+			        .Select(data => new AdsException(data.Item1, data.Item2))
+			        .Subscribe(data => completionSource.TrySetException(data))
+			        .AddTo(disposable);
+		        
+		        Observable.FromEvent<EventHandler<Reward>, (object, Reward)>(
+				        (action => (obj, args) => action.Invoke((obj, args))),
+				        (handler => rewardedAd.OnUserEarnedReward += handler),
+				        (handler => rewardedAd.OnUserEarnedReward -= handler)
+			        )
+			        .First()
+			        .Subscribe(data => completionSource.TrySetResult(data.Item2))
+			        .AddTo(disposable);
+		        
+		        rewardedAd.Show();
+
+		        return await completionSource.Task;
+	        }
+	        finally
+	        {
+		        disposable?.Dispose();
+	        }
+        }
+
+        private async UniTask ShowInterstitialAd(InterstitialAd interstitialAd)
+        {
+	        if (!interstitialAd.IsLoaded())
+	        {
+		        throw new AdsNotLoaded();
+	        }
+
+	        CompositeDisposable disposable = new CompositeDisposable();
+	        UniTaskCompletionSource<(object, EventArgs)> completionSource = new UniTaskCompletionSource<(object, EventArgs)>();
+
+	        try
+	        {
+		        Observable.FromEvent<EventHandler<EventArgs>, (object, EventArgs)>(
+				        (action => (obj, args) => action.Invoke((obj, args))),
+				        (handler => interstitialAd.OnAdClosed += handler),
+				        (handler => interstitialAd.OnAdClosed -= handler)
+			        )
+			        .First()
+			        .Subscribe(data => completionSource.TrySetResult(data))
+			        .AddTo(disposable);
+		        
+		        Observable.FromEvent<EventHandler<AdErrorEventArgs>, (object, AdErrorEventArgs)>(
+				        (action => (obj, args) => action.Invoke((obj, args))),
+				        (handler => interstitialAd.OnAdFailedToShow += handler),
+				        (handler => interstitialAd.OnAdFailedToShow -= handler)
+			        )
+			        .First()
+			        .Select(data => new AdsException(data.Item1, data.Item2))
+			        .Subscribe(data => completionSource.TrySetException(data))
+			        .AddTo(disposable);
+
+		        interstitialAd.Show();
+		        
+		        await completionSource.Task;
+	        }
+	        finally
+	        {
+		        disposable?.Dispose();
+	        }
         }
     }
 }

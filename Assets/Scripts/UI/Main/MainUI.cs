@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using CommonData;
 using Cysharp.Threading.Tasks;
+using GoogleMobileAds.Api;
 using Services;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Advertisements;
 using Zenject;
 using UniRx;
 using UnityEngine.Analytics;
@@ -47,7 +47,7 @@ public class MainUI : MonoBehaviour
 
         CurrentPage
             .Where(page => page != default)
-            .Subscribe(page => _adService.ShowBanner(BannerPosition.TOP_CENTER).Forget())
+            .Subscribe(page => _adService.ShowBanner(AdPosition.Top).Forget())
             .AddTo(this);
         
         CurrentPage
