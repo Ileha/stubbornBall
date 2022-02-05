@@ -4,3 +4,12 @@ Stubborn Ball is a game which may be passed by various ways. The game has severa
 
 ## Gameplay video
 [![Stubborn Ball](https://i9.ytimg.com/vi/1daqa6MgqTE/mq1.jpg?sqp=CL2U7OwF&rs=AOn4CLANYwkLBJMEcKMyTVUebJuGsSNvaw)](https://youtu.be/1daqa6MgqTE)
+
+## Link shortener service
+
+[Service](https://tinycc.com/tiny/manage)  
+[Rate us button (Android)](http://p1dz.2.vu/F195FA670CA7B0767B3F43F5B)  
+[Rate us button (iOS)](http://p1dz.2.vu/727677E305DF9F855BEA4556F)
+
+
+

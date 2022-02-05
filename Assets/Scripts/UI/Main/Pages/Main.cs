@@ -6,6 +6,7 @@ public class Main : Page
 {
 	public Button Levels;
 	public Button Settings;
+	public Button RateUs;
 
 	protected override void Start()
 	{
@@ -20,6 +21,12 @@ public class Main : Page
 			.onClick
 			.AsObservable()
 			.Subscribe(x => MainUi.ShowSettings())
+			.AddTo(this);
+
+		RateUs
+			.onClick
+			.AsObservable()
+			.Subscribe(x => MainUi.RateUs())
 			.AddTo(this);
 	}
 }

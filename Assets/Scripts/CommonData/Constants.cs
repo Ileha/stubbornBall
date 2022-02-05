@@ -18,7 +18,14 @@ namespace CommonData
         public const string ShakeDetection = "ShakeDetection";
         
         #endregion
+
+#if UNITY_ANDROID
+        public const string RateUsLink = "http://p1dz.2.vu/F195FA670CA7B0767B3F43F5B";
+#elif UNITY_IOS        
+        public const string RateUsLink = "http://p1dz.2.vu/727677E305DF9F855BEA4556F";
+#endif
         
-        
+
+
     }
 }

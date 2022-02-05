@@ -62,7 +62,12 @@ public class MainUI : MonoBehaviour
             )
             .AddTo(this);
     }
-    
+
+    public void RateUs()
+    {
+        Application.OpenURL(Constants.RateUsLink);
+    }
+
     public void ShowMain()
     {
         _currentPage.Value = Main;
