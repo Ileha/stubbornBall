@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Goods.Abstract;
 
@@ -9,22 +10,34 @@ public class Finish : AbstractLevelComponent
     [SerializeField] private ParticleSystem particle;
     public float time = 5;
 
+    private CancellationTokenSource _cancellationTokenSource;
+    
     void Awake()
     {
         levelDataModel.OnRestart += Reset;
     }
 
-    async void OnTriggerEnter2D(Collider2D other)
+    private void ResetToken()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = default;
+    }
+
+    private async void OnTriggerEnter2D(Collider2D other)
     {
         if (!levelDataModel.IsCircle(other.gameObject))
         {
             return;
         }
 
+        ResetToken();
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
         Rigidbody2D rigidbody = other.gameObject.GetComponent<Rigidbody2D>();
         if (rigidbody != null)
         {
-            FallAsync(rigidbody).Forget();
+            FallAsync(rigidbody, token).Forget();
             await UniTask.Delay(TimeSpan.FromSeconds(time));
             ParticleSystem particleResult = Instantiate(particle, other.transform.position, Quaternion.identity);
             Destroy(particleResult, 5);
@@ -32,9 +45,9 @@ public class Finish : AbstractLevelComponent
         }
     }
 
-    private async UniTask FallAsync(Rigidbody2D rigidbody)
+    private async UniTask FallAsync(Rigidbody2D rigidbody, CancellationToken token)
     {
-        await Fall(rigidbody);
+        await Fall(rigidbody).WithCancellation(token);
     }
 
     private IEnumerator Fall(Rigidbody2D rigidbody)
@@ -66,5 +79,6 @@ public class Finish : AbstractLevelComponent
     private void Reset()
     {
         StopAllCoroutines();
+        ResetToken();
     }
 }
