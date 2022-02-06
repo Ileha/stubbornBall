@@ -1,14 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Game.Goods.Abstract;
+using Services;
 using UnityEngine;
+using Zenject;
 
-public class breakPlane : AbstractLevelComponent {
+public class BreakPlane : AbstractLevelComponent {
 	public Sprite breakPlate;
 	public float Seconds = 5;
+	[SerializeField] public AudioClip crackEffect;
 
 	private Coroutine wait;
 	private GameObject BrokenPlate;
+	[Inject] private readonly AudioPlayerService _audioPlayerService;
 
 	void Awake() {
 		levelDataModel.OnRestart += reset;
@@ -25,6 +30,7 @@ public class breakPlane : AbstractLevelComponent {
 	private IEnumerator Wait() {
 		yield return new WaitForSeconds(Seconds);
 
+		_audioPlayerService.Play(crackEffect).Forget();
 		BrokenPlate.transform.position = transform.position;
 		BrokenPlate.SetActive(true);
 		gameObject.SetActive(false);

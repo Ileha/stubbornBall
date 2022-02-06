@@ -2,12 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using CommonData;
+using Cysharp.Threading.Tasks;
 using Game.Goods.Abstract;
+using Services;
 using UnityEngine;
 using UnityEngine.Analytics;
+using Zenject;
 
 public class BigGun : AbstractLevelComponent, Iinput 
 {
+	[SerializeField] public AudioClip shootEffect;
+	
 	public Vector2 ShootDirection;
 	public Animator animator;
 	public float rotationSpeed = 1;
@@ -18,6 +23,8 @@ public class BigGun : AbstractLevelComponent, Iinput
 	private Rigidbody2D rigidbody;
 	private float rigidbodyZ;
 	private Coroutine currentRotation;
+	
+	[Inject] private readonly AudioPlayerService _audioPlayerService;
 
 	void Awake() {
 		levelDataModel.OnRestart += reset;
@@ -83,6 +90,7 @@ public class BigGun : AbstractLevelComponent, Iinput
 	}
 
 	public void OnShoot() {//invoked from animation
+		_audioPlayerService.Play(shootEffect).Forget();
 		rigidbody.bodyType = RigidbodyType2D.Dynamic;
 		rigidbody.AddForce(GetShootDirection()* forse, ForceMode2D.Impulse);
 		rigidbody.transform.position = new Vector3(rigidbody.transform.position.x, rigidbody.transform.position.y, rigidbodyZ);

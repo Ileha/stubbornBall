@@ -1,13 +1,24 @@
-﻿using Game.Goods.Abstract;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using Extensions;
+using Game.Goods.Abstract;
+using Services;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
+using Zenject;
 
-public class Cricle : AbstractLevelComponent {
+public class Cricle : AbstractLevelComponent
+{
+	[SerializeField] public AudioClip collisionEffect;
+	
 	public Rigidbody2D rigidbody { get; private set; }
 
 	private Vector3 StartPosition;
 	private Vector3 scale;
 	private Quaternion rotation;
 	private Collider2D CircleCollider;
+	[Inject] private readonly AudioPlayerService _audioPlayerService;
 
 	void Awake() 
 	{
@@ -20,11 +31,32 @@ public class Cricle : AbstractLevelComponent {
 		StartPosition = transform.position;
 		scale = transform.localScale;
 		rotation = transform.rotation;
-	}
 
-	//void Update() {
-	//	Debug.DrawRay(gameObject.transform.position, rigidbody.velocity, Color.red);
-	//}
+		gameObject
+			.OnCollisionEnter2DAsObservable()
+			.Select(collision => (collision, Time.time))
+			.CombineWithPrevious((previous, next) => (previous, next))
+			.Select(data =>
+			{
+				if (data.previous != default && 
+				    data.next.collision.collider == data.previous.collision.collider &&
+				    data.next.time - data.previous.time < 0.25f)
+				{
+					return Observable.Empty<Collision2D>();
+				}
+
+				return Observable.Return(data.next.collision);
+			})
+			.Switch()
+			.Subscribe(x =>
+			{
+				if (collisionEffect != null)
+				{
+					_audioPlayerService.Play(collisionEffect).Forget();
+				}
+			})
+			.AddTo(this);
+	}
 
 	private void shaking(Vector3 direction) {
 		rigidbody.AddForce(direction, ForceMode2D.Impulse);

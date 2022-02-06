@@ -6,53 +6,78 @@ using UniRx;
 using UnityEngine;
 using Zenject;
 
-public class AudioPlayerService : IInitializable, IDisposable 
+namespace Services
 {
-	public ReactiveProperty<float> Volume = new ReactiveProperty<float>(1);
-
-	private AudioSource _source;
-	private IEnumerator<AudioClip> _clips;
-	private CancellationTokenSource _cancellation;
-	private readonly CompositeDisposable _compositeDisposable = new CompositeDisposable();
-	private GameObject _playerGO;
-
-	public void SetClips(IEnumerable<AudioClip> clips) 
+	public class AudioPlayerService : IInitializable, IDisposable 
 	{
-		_cancellation?.Cancel();
-		_cancellation?.Dispose();
-		_cancellation = new CancellationTokenSource();
-		var token = _cancellation.Token;
-		
-		_clips = clips.GetEnumerator();
-		Play(token);
-	}
+		public ReactiveProperty<float> Volume = new ReactiveProperty<float>(1);
 
-	private async void Play(CancellationToken token)
-	{
-		while (_clips.MoveNext())
+		[Inject] private readonly AudioInstance.Factory _factory;
+
+		private CancellationTokenSource _cancellation;
+		private CancellationToken _cancellationToken;
+
+		public async UniTask Play(AudioClip clip, CancellationToken token = default)
 		{
-			_source.clip = _clips.Current;
-			_source.Play();
-			await UniTask.Delay(TimeSpan.FromSeconds(_source.clip.length - _source.time));
+			if (token == default)
+			{
+				token = CancellationToken.None;
+			}
+
+			var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, _cancellationToken);
+			var finalToken = finalTokenSource.Token;
+			
+			using (AudioInstance audioInstance = _factory.Create())
+			{
+				audioInstance.AudioSource.clip = clip;
+				audioInstance.AudioSource.Play();
+				await UniTask.Delay(
+					TimeSpan.FromSeconds(audioInstance.AudioSource.clip.length - audioInstance.AudioSource.time),
+					cancellationToken: finalToken
+				);
+				finalToken.ThrowIfCancellationRequested();
+			}
 		}
-		_source.Stop();
-	}
 
-	public void Initialize()
-	{
-		_playerGO = new GameObject("AudioPlayer", typeof(AudioSource));
-		UnityEngine.Object.DontDestroyOnLoad(_playerGO.gameObject);
-		_source = _playerGO.GetComponent<AudioSource>();
-		_source.playOnAwake = false;
-		Volume.Value = _source.volume;
-		Volume
-			.Subscribe(x => _source.volume = x)
-			.AddTo(_compositeDisposable);
-	}
+		public async UniTask Play(IEnumerable<AudioClip> clips, CancellationToken token = default)
+		{
+			if (token == default)
+			{
+				token = CancellationToken.None;
+			}
 
-	public void Dispose()
-	{
-		_compositeDisposable?.Dispose();
-		UnityEngine.Object.Destroy(_playerGO);
+			var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, _cancellationToken);
+			var finalToken = finalTokenSource.Token;
+			
+			using (AudioInstance audioInstance = _factory.Create())
+			{
+				using (var clipsEnumerator = clips.GetEnumerator())
+				{
+					while (clipsEnumerator.MoveNext())
+					{
+						audioInstance.AudioSource.clip = clipsEnumerator.Current;
+						audioInstance.AudioSource.Play();
+						await UniTask.Delay(
+							TimeSpan.FromSeconds(audioInstance.AudioSource.clip.length - audioInstance.AudioSource.time),
+							cancellationToken: finalToken
+						);
+						finalToken.ThrowIfCancellationRequested();
+					}
+				}
+			}
+		}
+
+		public void Initialize()
+		{
+			_cancellation = new CancellationTokenSource();
+			_cancellationToken = _cancellation.Token;
+		}
+
+		public void Dispose()
+		{
+			_cancellation?.Cancel();
+			_cancellation?.Dispose();
+			_cancellation = default;
+		}
 	}
 }

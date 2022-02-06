@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -14,7 +15,7 @@ namespace Services
 
         private void Start()
         {
-            _playerService.SetClips(GetPlayList());
+            _playerService.Play(GetPlayList()).Forget();
         }
 
         private IEnumerable<AudioClip> GetPlayList()
