@@ -7,6 +7,7 @@ using Game.Goods.Abstract;
 using Services;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngine.Audio;
 using Zenject;
 
 public class BigGun : AbstractLevelComponent, Iinput 
@@ -25,6 +26,7 @@ public class BigGun : AbstractLevelComponent, Iinput
 	private Coroutine currentRotation;
 	
 	[Inject] private readonly AudioPlayerService _audioPlayerService;
+	[Inject(Id = GameAudioMixer.Effect)] private readonly AudioMixerGroup _effectMixer;
 
 	void Awake() {
 		levelDataModel.OnRestart += reset;
@@ -90,7 +92,7 @@ public class BigGun : AbstractLevelComponent, Iinput
 	}
 
 	public void OnShoot() {//invoked from animation
-		_audioPlayerService.Play(shootEffect).Forget();
+		_audioPlayerService.Play(shootEffect, _effectMixer).Forget();
 		rigidbody.bodyType = RigidbodyType2D.Dynamic;
 		rigidbody.AddForce(GetShootDirection()* forse, ForceMode2D.Impulse);
 		rigidbody.transform.position = new Vector3(rigidbody.transform.position.x, rigidbody.transform.position.y, rigidbodyZ);

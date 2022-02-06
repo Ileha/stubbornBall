@@ -1,4 +1,5 @@
 ﻿using System;
+using CommonData;
 using Cysharp.Threading.Tasks;
 using Extensions;
 using Game.Goods.Abstract;
@@ -6,6 +7,7 @@ using Services;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 public class Cricle : AbstractLevelComponent
@@ -19,6 +21,7 @@ public class Cricle : AbstractLevelComponent
 	private Quaternion rotation;
 	private Collider2D CircleCollider;
 	[Inject] private readonly AudioPlayerService _audioPlayerService;
+	[Inject(Id = GameAudioMixer.Effect)] private readonly AudioMixerGroup _effectMixer;
 
 	void Awake() 
 	{
@@ -52,7 +55,7 @@ public class Cricle : AbstractLevelComponent
 			{
 				if (collisionEffect != null)
 				{
-					_audioPlayerService.Play(collisionEffect).Forget();
+					_audioPlayerService.Play(collisionEffect, _effectMixer).Forget();
 				}
 			})
 			.AddTo(this);

@@ -6,6 +6,7 @@ using Services;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 using Zenject;
 
@@ -15,19 +16,28 @@ public class SettingsPage : Page
 	public Slider volume;
 	
 	[Inject] private readonly AudioPlayerService audioPlayerService;
+	[Inject(Id = GameAudioMixer.Master)] private readonly AudioMixerGroup _masterMixer;
 
 	protected override void Start()
 	{
 		base.Start();
 		Back.onClick.AddListener(() => MainUi.ShowMain());
-		volume.value = audioPlayerService.Volume.Value;
+
+		volume.maxValue = Constants.MixerMax;
+		volume.minValue = Constants.MixerMin;
+
+		if (_masterMixer.audioMixer.GetFloat(Constants.MainMixerVolume, out var mainMixerVolume))
+		{
+			volume.value = mainMixerVolume;
+		}
 
 		volume
 			.onValueChanged
 			.AsObservable()
+			.DistinctUntilChanged()
 			.Subscribe(val =>
 			{
-				audioPlayerService.Volume.Value = val;
+				_masterMixer.audioMixer.SetFloat(Constants.MainMixerVolume, val);
 			})
 			.AddTo(this);
 		

@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using CommonData;
 using Cysharp.Threading.Tasks;
 using Game.Goods.Abstract;
 using Services;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 public class Spring : AbstractLevelComponent {
@@ -12,6 +14,7 @@ public class Spring : AbstractLevelComponent {
 	
 	[Inject] private readonly AudioPlayerService _audioPlayerService;
 	private Animator animator;
+	[Inject(Id = GameAudioMixer.Effect)] private readonly AudioMixerGroup _effectMixer;
 
 	// Use this for initialization
 	void Start () {
@@ -24,7 +27,7 @@ public class Spring : AbstractLevelComponent {
 
 		if (rigibody != null) 
 		{
-			_audioPlayerService.Play(springEffect).Forget();
+			_audioPlayerService.Play(springEffect, _effectMixer).Forget();
 			animator.SetTrigger("play");
 			rigibody.AddForce(transform.up * forse, ForceMode2D.Impulse);
 		}

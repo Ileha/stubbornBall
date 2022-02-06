@@ -2,10 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using CommonData;
 using Cysharp.Threading.Tasks;
 using Game.Goods.Abstract;
 using Services;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 public class Fan : AbstractLevelComponent {
@@ -15,12 +17,13 @@ public class Fan : AbstractLevelComponent {
 	
 	[Inject] private readonly AudioPlayerService _audioPlayerService;
 	private CancellationTokenSource _cancellationTokenSource;
+	[Inject(Id = GameAudioMixer.Effect)] private readonly AudioMixerGroup _effectMixer;
 
 	private void Awake()
 	{
 		_cancellationTokenSource = new CancellationTokenSource();
 		var token = _cancellationTokenSource.Token;
-		_audioPlayerService.Play(GetFanPlayList(), token).Forget();
+		_audioPlayerService.Play(GetFanPlayList(), _effectMixer, token).Forget();
 	}
 
 	private IEnumerable<AudioClip> GetFanPlayList()

@@ -1,33 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CommonData;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 namespace Services
 {
 	public class AudioPlayerService : IInitializable, IDisposable 
 	{
-		public ReactiveProperty<float> Volume = new ReactiveProperty<float>(1);
-
 		[Inject] private readonly AudioInstance.Factory _factory;
+		[Inject(Id = GameAudioMixer.Master)] private readonly AudioMixerGroup _masterMixer;
 
 		private CancellationTokenSource _cancellation;
 		private CancellationToken _cancellationToken;
 
-		public async UniTask Play(AudioClip clip, CancellationToken token = default)
+		public async UniTask Play(AudioClip clip, AudioMixerGroup mixer = default, CancellationToken token = default)
 		{
 			if (token == default)
 			{
 				token = CancellationToken.None;
 			}
 
+			if (mixer == default)
+			{
+				mixer = _masterMixer;
+			}
+
 			var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, _cancellationToken);
 			var finalToken = finalTokenSource.Token;
 			
-			using (AudioInstance audioInstance = _factory.Create())
+			using (AudioInstance audioInstance = _factory.Create(mixer))
 			{
 				audioInstance.AudioSource.clip = clip;
 				audioInstance.AudioSource.Play();
@@ -39,17 +45,22 @@ namespace Services
 			}
 		}
 
-		public async UniTask Play(IEnumerable<AudioClip> clips, CancellationToken token = default)
+		public async UniTask Play(IEnumerable<AudioClip> clips, AudioMixerGroup mixer = default, CancellationToken token = default)
 		{
 			if (token == default)
 			{
 				token = CancellationToken.None;
 			}
 
+			if (mixer == default)
+			{
+				mixer = _masterMixer;
+			}
+			
 			var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, _cancellationToken);
 			var finalToken = finalTokenSource.Token;
 			
-			using (AudioInstance audioInstance = _factory.Create())
+			using (AudioInstance audioInstance = _factory.Create(mixer))
 			{
 				using (var clipsEnumerator = clips.GetEnumerator())
 				{

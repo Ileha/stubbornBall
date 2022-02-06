@@ -25,7 +25,14 @@ namespace CommonData
         public const string RateUsLink = "http://p1dz.2.vu/727677E305DF9F855BEA4556F";
 #endif
         
+        #region SoundMixers
 
+        public const string MainMixerVolume = "MasterVolume";
 
+        public const int MixerMax = 20;
+        public const int MixerMin = -80;
+        
+
+        #endregion
     }
 }

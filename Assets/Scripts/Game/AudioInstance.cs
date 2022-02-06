@@ -2,10 +2,11 @@ using System;
 using Services;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 [RequireComponent(typeof(AudioSource))]
-public class AudioInstance : MonoBehaviour, IPoolable<IMemoryPool>, IDisposable
+public class AudioInstance : MonoBehaviour, IPoolable<AudioMixerGroup, IMemoryPool>, IDisposable
 {
 	public AudioSource AudioSource
 	{
@@ -23,7 +24,6 @@ public class AudioInstance : MonoBehaviour, IPoolable<IMemoryPool>, IDisposable
 	private IMemoryPool _pool;
 	private AudioSource _audioSource;
 	private CompositeDisposable _compositeDisposable;
-	[Inject] private readonly AudioPlayerService _audioPlayerService;
 
 	public void OnDespawned()
 	{
@@ -32,15 +32,12 @@ public class AudioInstance : MonoBehaviour, IPoolable<IMemoryPool>, IDisposable
 		_compositeDisposable?.Dispose();
 	}
 
-	public void OnSpawned(IMemoryPool pool)
+	public void OnSpawned(AudioMixerGroup audioMixerGroup, IMemoryPool pool)
 	{
 		_pool = pool;
 		_compositeDisposable = new CompositeDisposable();
 
-		_audioPlayerService
-			.Volume
-			.Subscribe(volume => AudioSource.volume = volume)
-			.AddTo(_compositeDisposable);
+		AudioSource.outputAudioMixerGroup = audioMixerGroup;
 	}
 
 	public void Dispose()
@@ -48,7 +45,7 @@ public class AudioInstance : MonoBehaviour, IPoolable<IMemoryPool>, IDisposable
 		_pool.Despawn(this);
 	}
 	
-	public class Factory : PlaceholderFactory<AudioInstance>
+	public class Factory : PlaceholderFactory<AudioMixerGroup, AudioInstance>
 	{
 	}
 }
