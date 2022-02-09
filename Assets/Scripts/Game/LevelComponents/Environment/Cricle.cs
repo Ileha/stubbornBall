@@ -9,10 +9,11 @@ using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Audio;
 using Zenject;
+using Random = UnityEngine.Random;
 
 public class Cricle : AbstractLevelComponent
 {
-	[SerializeField] public AudioClip collisionEffect;
+	[SerializeField] public AudioClip[] collisionEffects;
 	
 	public Rigidbody2D rigidbody { get; private set; }
 
@@ -53,9 +54,9 @@ public class Cricle : AbstractLevelComponent
 			.Switch()
 			.Subscribe(x =>
 			{
-				if (collisionEffect != null)
+				if (collisionEffects != null && collisionEffects.Length > 0)
 				{
-					_audioPlayerService.Play(collisionEffect, _effectMixer).Forget();
+					_audioPlayerService.Play(collisionEffects[Random.Range(0, collisionEffects.Length)], _effectMixer).Forget();
 				}
 			})
 			.AddTo(this);
