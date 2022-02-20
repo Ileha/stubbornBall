@@ -6,8 +6,6 @@ using Extensions;
 using GoogleMobileAds.Api;
 using UniRx;
 using UnityEngine;
-using UnityEngine.Advertisements;
-using UnityEngine.Analytics;
 using Zenject;
 
 namespace Services
@@ -218,7 +216,20 @@ namespace Services
 	        MobileAds.Initialize(status =>
 	        {
 		        _initializationStatus = status;
-		        _adRequest = new AdRequest.Builder().Build();
+
+#if AdsTest
+
+		        RequestConfiguration requestConfiguration = new RequestConfiguration
+				        .Builder()
+			        .SetTestDeviceIds(Constants.DeviceIds)
+			        .build();
+		        
+		        MobileAds.SetRequestConfiguration(requestConfiguration);
+
+#endif
+		        
+		        _adRequest = new AdRequest.Builder()
+			        .Build();
 	        });
         }
 

@@ -1,9 +1,19 @@
 using System;
+using System.Collections.Generic;
 
 namespace CommonData
 {
     public static class Constants
     {
+        #if AdsTest
+        
+        public static readonly List<string> DeviceIds = new List<string>()
+        {
+            "33023DB84D98175E"
+        };
+
+        #endif
+        
         #region Analytics
 
         public const string MainUIPageOpened = "MainUIPageOpened";
