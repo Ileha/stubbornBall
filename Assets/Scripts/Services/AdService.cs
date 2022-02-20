@@ -137,6 +137,7 @@ namespace Services
 				        (handler => rewardedAd.OnAdClosed -= handler)
 			        )
 			        .First()
+			        .ObserveOnMainThread()
 			        .Subscribe(data => completionSource.TrySetResult(new Reward()))
 			        .AddTo(disposable);
 		        
@@ -146,6 +147,7 @@ namespace Services
 				        (handler => rewardedAd.OnAdFailedToShow -= handler)
 			        )
 			        .First()
+			        .ObserveOnMainThread()
 			        .Select(data => new AdsException(data.Item1, data.Item2))
 			        .Subscribe(data => completionSource.TrySetException(data))
 			        .AddTo(disposable);
@@ -156,6 +158,7 @@ namespace Services
 				        (handler => rewardedAd.OnUserEarnedReward -= handler)
 			        )
 			        .First()
+			        .ObserveOnMainThread()
 			        .Subscribe(data => completionSource.TrySetResult(data.Item2))
 			        .AddTo(disposable);
 		        
@@ -187,6 +190,7 @@ namespace Services
 				        (handler => interstitialAd.OnAdClosed -= handler)
 			        )
 			        .First()
+			        .ObserveOnMainThread()
 			        .Subscribe(data => completionSource.TrySetResult(data))
 			        .AddTo(disposable);
 		        
@@ -196,6 +200,7 @@ namespace Services
 				        (handler => interstitialAd.OnAdFailedToShow -= handler)
 			        )
 			        .First()
+			        .ObserveOnMainThread()
 			        .Select(data => new AdsException(data.Item1, data.Item2))
 			        .Subscribe(data => completionSource.TrySetException(data))
 			        .AddTo(disposable);
