@@ -30,9 +30,9 @@ namespace CommonData
         #endregion
 
 #if UNITY_ANDROID
-        public const string RateUsLink = "http://p1dz.2.vu/F195FA670CA7B0767B3F43F5B";
+        public const string RateUsLink = "https://stubbornball.page.link/RateUsAndroid";
 #elif UNITY_IOS        
-        public const string RateUsLink = "http://p1dz.2.vu/727677E305DF9F855BEA4556F";
+        public const string RateUsLink = "https://stubbornball.page.link/RateUsIos;
 #endif
         
         #region SoundMixers
