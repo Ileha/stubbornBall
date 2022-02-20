@@ -1,7 +1,9 @@
 using Game.Goods.Abstract;
+using Services;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace Game.LevelComponents.UI
 {
@@ -9,19 +11,25 @@ namespace Game.LevelComponents.UI
     {
         [SerializeField] private Button button;
 
+        [Inject] private readonly AdService _adService;
+
         private void Awake()
         {
-            if (!levelDataModel.IsNextLevelAvailable)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
+            _adService
+                .AdsLoaded
+                .Subscribe(SetButtonAvailability)
+                .AddTo(this);
 
             button
                 .onClick
                 .AsObservable()
                 .Subscribe(x => levelDataModel.SkipLevel())
                 .AddTo(this);
+        }
+
+        private void SetButtonAvailability(bool adLoaded)
+        {
+            gameObject.SetActive(adLoaded && levelDataModel.IsNextLevelAvailable);
         }
     }
 }

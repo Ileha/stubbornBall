@@ -350,8 +350,8 @@ public class LevelDataModel : MonoBehaviour
 #endif
             return;
         }
-        
-        if (_adData.SkipLevelRewardIdentity.Equals(result.Type) && result.Amount > 0)
+
+        void SetLevelPassed()
         {
             _data.SetLevelStar(_level, 0);
             
@@ -370,5 +370,18 @@ public class LevelDataModel : MonoBehaviour
                 _levelService.SetLevel(nextLevel);
             }
         }
+
+
+#if UNITY_EDITOR
+        
+        SetLevelPassed();
+        
+#elif UNITY_IOS || UNITY_ANDROID
+
+        if (_adData.SkipLevelRewardIdentity.Equals(result.Type) && result.Amount > 0)
+        {
+            SetLevelPassed();
+        }
+#endif
     }
 }
