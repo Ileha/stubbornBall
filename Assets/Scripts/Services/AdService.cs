@@ -30,7 +30,8 @@ namespace Services
         
         public void Initialize()
         {
-	        MobileAds.Initialize(status =>
+#if ShowAds
+			MobileAds.Initialize(status =>
 	        {
 		        _initializationStatus = status;
 
@@ -54,35 +55,47 @@ namespace Services
 		        
 		        _adRequest = new AdRequest.Builder()
 			        .Build();
-	        });
+	        });      
+#endif
         }
 
         public bool IsLoaded()
         {
+#if ShowAds
 	        return _initializationStatus != null;
+#else
+	        return false;
+#endif
         }
 
         public bool HasNextAd()
         {
+#if ShowAds
 	        var localMax = (AdData.MaxAdFrequency - _adData.AdFrequency)+1;
 	        addCount = (addCount + 1) % localMax;
 	        Debug.Log($"Advertisement: {addCount}/{localMax}");
 	        return addCount == 0;
+#else
+	        return false;
+#endif
         }
-    
+
         public async UniTask ShowBanner(AdPosition position)
         {
+#if ShowAds
 	        await AdsLoadingTask;
 
 	        _bannerView?.Destroy();
 	        _bannerView = new BannerView(_adData.BannerId, AdSize.Banner, position);
 	        await new BannerViewLoading(_bannerView).Load(_adRequest);
 	        Debug.Log("Advertisement: show banner");
+#endif
         }
         
         public async UniTask ShowVideo() 
         {
-	        await AdsLoadingTask;
+#if ShowAds
+			await AdsLoadingTask;
 	        
 	        var id = AnalyticsExtensions.BeginEvent(Constants.RegularVideo);
 	        try
@@ -96,12 +109,14 @@ namespace Services
 	        {
 		        AnalyticsExtensions.CompleteEvent(id);
 		        Debug.Log("Advertisement: show video");
-	        }
+	        }		
+#endif
         }
     
         public async UniTask<Reward> ShowRewardedVideo()
         {
-	        await AdsLoadingTask;
+#if ShowAds
+			await AdsLoadingTask;
 	        
 	        var id = AnalyticsExtensions.BeginEvent(Constants.RewardedVideo);
 	        try
@@ -117,6 +132,13 @@ namespace Services
 		        AnalyticsExtensions.CompleteEvent(id);
 		        Debug.Log("Advertisement: show rewarded video");
 	        }
+#else
+	        return new Reward()
+	        {
+		        Type = String.Empty,
+		        Amount = 0
+	        };
+#endif
         }
         
         private async UniTask<Reward> ShowRewardedAd(RewardedAd rewardedAd) 
