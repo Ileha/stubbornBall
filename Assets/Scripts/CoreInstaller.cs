@@ -1,4 +1,5 @@
 using CommonData;
+using Interfaces;
 using Services;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -57,7 +58,9 @@ public class CoreInstaller : MonoInstaller
             .NonLazy();
 
         Container
-            .BindInstance(AdSettings)
+            .Bind<IAdData>()
+            .To<AdData>()
+            .FromInstance(AdSettings)
             .AsSingle()
             .NonLazy();
         

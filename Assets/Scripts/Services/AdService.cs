@@ -5,6 +5,7 @@ using CommonData;
 using Cysharp.Threading.Tasks;
 using Extensions;
 using GoogleMobileAds.Api;
+using Interfaces;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -17,7 +18,7 @@ namespace Services
 	    
 	    private int addCount = 0;
 
-        [Inject] private readonly AdData _adData;
+        [Inject] private readonly IAdData _adData;
         private InitializationStatus _initializationStatus;
 
         private InterstitialAd _interstitialAd;

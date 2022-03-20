@@ -6,6 +6,7 @@ using CommonData;
 using Cysharp.Threading.Tasks;
 using Game.LevelComponents.Environment;
 using GoogleMobileAds.Api;
+using Interfaces;
 using Services;
 using UniRx;
 using UnityEngine.EventSystems;
@@ -44,7 +45,7 @@ public class LevelDataModel : MonoBehaviour
     [Inject] private readonly Level _level;
     [Inject] private readonly DrawLine _lineDrawer;
     [Inject] private readonly EndOfLevel _endOfLevel;
-    [Inject] private readonly AdData _adData;
+    [Inject] private readonly IAdData _adData;
 
     void Start()
     {
