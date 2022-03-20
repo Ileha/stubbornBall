@@ -32,7 +32,9 @@ namespace CommonData
 #if UNITY_ANDROID
         public const string RateUsLink = "https://stubbornball.page.link/RateUsAndroid";
 #elif UNITY_IOS        
-        public const string RateUsLink = "https://stubbornball.page.link/RateUsIos;
+        public const string RateUsLink = "https://stubbornball.page.link/RateUsIos";
+#else
+        public const string RateUsLink = "";
 #endif
         
         #region SoundMixers
