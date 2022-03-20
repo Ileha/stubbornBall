@@ -107,3 +107,4 @@ Temporary Items
 level.dat
 *.keystore
 Assets/Scripts/CommonData/AdData.cs
+Assets/Scripts/CommonData/AdData.cs.meta
