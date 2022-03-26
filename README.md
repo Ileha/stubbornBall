@@ -7,15 +7,10 @@ Stubborn Ball is a game which may be passed by various ways. The game has severa
 Puzzle game, based on physical principles. The main goal is to collect as many stars as possible. Player should draw lines to adjust the trajectory of the ball so that it can maximize the number of gathered stars. The ball can roll, fall and jump. 
 
 ## Gameplay video
-[![Stubborn Ball](https://i9.ytimg.com/vi/1daqa6MgqTE/mq1.jpg?sqp=CL2U7OwF&rs=AOn4CLANYwkLBJMEcKMyTVUebJuGsSNvaw)](https://youtu.be/1daqa6MgqTE)
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/MAuhODlbuoE/0.jpg)](https://www.youtube.com/watch?v=MAuhODlbuoE)
 
 ## Link shortener service
 
-[Service](https://tinycc.com/tiny/manage)  doesn't work wants money
-[Rate us button (Android)](http://p1dz.2.vu/F195FA670CA7B0767B3F43F5B)  
-[Rate us button (iOS)](http://p1dz.2.vu/727677E305DF9F855BEA4556F)
-
-move to firebase and created app "Stubbon Ball"
-
-
-
+[Rate us button (Android)](https://stubbornball.page.link/RateUsAndroid)  
+[Rate us button (iOS)](https://stubbornball.page.link/RateUsIos)  
