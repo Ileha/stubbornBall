@@ -37,11 +37,17 @@ public class Finish : AbstractLevelComponent
         Rigidbody2D rigidbody = other.gameObject.GetComponent<Rigidbody2D>();
         if (rigidbody != null)
         {
-            FallAsync(rigidbody, token).Forget();
-            await UniTask.Delay(TimeSpan.FromSeconds(time));
-            ParticleSystem particleResult = Instantiate(particle, other.transform.position, Quaternion.identity);
-            Destroy(particleResult, 5);
-            levelDataModel.Finish(other.gameObject);
+            try
+            {
+                FallAsync(rigidbody, token).Forget();
+                await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: token);
+                ParticleSystem particleResult = Instantiate(particle, other.transform.position, Quaternion.identity);
+                Destroy(particleResult, 5);
+                levelDataModel.Finish(other.gameObject);
+            }
+            catch (OperationCanceledException cancelled)
+            {
+            }
         }
     }
 
