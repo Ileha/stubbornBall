@@ -32,15 +32,15 @@ namespace pingak9
         }
 
         public static void OpenDatePicker(int year, int month, int day, bool cancelable = true,
-            Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+            Action<DateTime> onChange = null, Action<DateTime> onClose = null, Action onDismiss = null)
         {
-            MobileDateTimePicker.CreateDate(year, month, day, cancelable, onChange, onClose);
+            MobileDateTimePicker.CreateDate(year, month, day, cancelable, onChange, onClose, onDismiss);
         }
 
         public static void OpenDatePicker(string message, int year, int month, int day, bool cancelable = true,
-            Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+            Action<DateTime> onChange = null, Action<DateTime> onClose = null, Action onDismiss = null)
         {
-            MobileDateTimePicker.CreateDate(message, year, month, day, cancelable, onChange, onClose);
+            MobileDateTimePicker.CreateDate(message, year, month, day, cancelable, onChange, onClose, onDismiss);
         }
 
         public static void OpenTimePicker(Action<DateTime> onChange = null, Action<DateTime> onClose = null)
@@ -55,8 +55,9 @@ namespace pingak9
 
             OpenDatePicker(
                 message, year, month, day, cancelable,
-                time => source.TrySetResult(time),
-                time => source.TrySetCanceled());
+                onClose: time => source.TrySetResult(time),
+                onDismiss: () => source.TrySetCanceled()
+                );
 
             return source.Task;
         }

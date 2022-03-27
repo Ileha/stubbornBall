@@ -6,7 +6,8 @@ namespace pingak9
 {
     public enum IOSDateTimePickerMode
     {
-        Time = 1, // Displays hour, minute, and optionally AM/PM designation depending on the locale setting (e.g. 6 | 53 | PM)
+        Time =
+            1, // Displays hour, minute, and optionally AM/PM designation depending on the locale setting (e.g. 6 | 53 | PM)
         Date = 2, // Displays month, day, and year depending on the locale setting (e.g. November | 15 | 2007)
     }
 
@@ -15,27 +16,33 @@ namespace pingak9
     {
         public Action<DateTime> OnDateChanged;
         public Action<DateTime> OnPickerClosed;
+        public Action OnPickerDismiss;
 
 
         #region PUBLIC_FUNCTIONS
 
-        public static MobileDateTimePicker CreateDate(int year, int month, int day, bool cancelable = true, Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+        public static MobileDateTimePicker CreateDate(int year, int month, int day, bool cancelable = true,
+            Action<DateTime> onChange = null, Action<DateTime> onClose = null, Action onDismiss = null)
         {
             MobileDateTimePicker dialog;
             dialog = new GameObject("MobileDateTimePicker").AddComponent<MobileDateTimePicker>();
             dialog.OnDateChanged = onChange;
             dialog.OnPickerClosed = onClose;
+            dialog.OnPickerDismiss = onDismiss;
 
             MobileNative.showDatePicker(year, month, day, cancelable);
             return dialog;
         }
-        
-        public static MobileDateTimePicker CreateDate(string message, int year, int month, int day, bool cancelable = true, Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+
+        public static MobileDateTimePicker CreateDate(string message, int year, int month, int day,
+            bool cancelable = true, Action<DateTime> onChange = null, Action<DateTime> onClose = null,
+            Action onDismiss = null)
         {
             MobileDateTimePicker dialog;
             dialog = new GameObject("MobileDateTimePicker").AddComponent<MobileDateTimePicker>();
             dialog.OnDateChanged = onChange;
             dialog.OnPickerClosed = onClose;
+            dialog.OnPickerDismiss = onDismiss;
 
             MobileNative.showDatePicker(message, year, month, day, cancelable);
             return dialog;
@@ -55,22 +62,24 @@ namespace pingak9
         #endregion
 
 
-
         //--------------------------------------
         // Events
         //--------------------------------------
 
         string formatDate = "yyyy-MM-dd HH:mm:ss";
+
         /// <summary>
         /// Note avalible in android
         /// </summary>
         /// <param name="time"></param>
         public void DateChangedEvent(string time)
         {
+            Debug.Log($"{typeof(MobileDateTimePicker)} DateChangedEvent");
+
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
 
-            if (OnDateChanged!= null)
+            if (OnDateChanged != null)
             {
                 OnDateChanged(dt);
                 Destroy(GameObject.Find("MobileDateTimePicker")); //To destroy the respective gameobject
@@ -79,12 +88,27 @@ namespace pingak9
 
         public void PickerClosedEvent(string time)
         {
+            Debug.Log($"{typeof(MobileDateTimePicker)} PickerClosedEvent");
+
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
 
             if (OnPickerClosed != null)
             {
                 OnPickerClosed(dt);
+                Destroy(GameObject.Find("MobileDateTimePicker")); //To destroy the respective gameobject
+            }
+        }
+
+        /// <summary>
+        /// only for android
+        /// </summary>
+        public void PickerDismissEvent(string data)
+        {
+            Debug.Log($"{typeof(MobileDateTimePicker)} PickerDismissEvent");
+            if (OnPickerDismiss != null)
+            {
+                OnPickerDismiss();
                 Destroy(GameObject.Find("MobileDateTimePicker")); //To destroy the respective gameobject
             }
         }
