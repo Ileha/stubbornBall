@@ -60,13 +60,19 @@ namespace Services
 #endif
         }
 
-        public void SetTagForChildDirectedTreatment(TagForChildDirectedTreatment tagForChildDirectedTreatment)
+        public async UniTask SetTagForChildDirectedTreatment(TagForChildDirectedTreatment tagForChildDirectedTreatment)
         {
 #if ShowAds
+	        Debug.Log($"{typeof(AdService)} SetTagForChildDirectedTreatment: {tagForChildDirectedTreatment}");
 #if UNITY_EDITOR
-	        Debug.Log($"set ChildDirectedTreatment: {tagForChildDirectedTreatment}");
+			throw new NotImplementedException();
 #elif UNITY_IOS || UNITY_ANDROID
-			RequestConfiguration requestConfiguration = new RequestConfiguration.Builder()
+			await _adsLoaded
+		        .Where(loaded => loaded)
+		        .First()
+		        .ToUniTask();
+	        
+	        RequestConfiguration requestConfiguration = new RequestConfiguration.Builder()
 		        .SetTagForChildDirectedTreatment(TagForChildDirectedTreatment.True)
 		        .build();
 	        MobileAds.SetRequestConfiguration(requestConfiguration);

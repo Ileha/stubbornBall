@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using CommonData;
+using Cysharp.Threading.Tasks;
 using Extensions;
 using GoogleMobileAds.Api;
 using pingak9;
@@ -19,20 +20,23 @@ namespace Services
             _adService = adService;
         }
 
-        public async void Initialize()
+        public void Initialize()
         {
             _userData = new AbstractSaver<UserData>("user.dat");
             _userData.Load().Wait();
             
-            Debug.Log($"current thread: {Thread.CurrentThread.ManagedThreadId}");
+            CheckCOPPACompliance().Forget();
+        }
 
+        private async UniTask CheckCOPPACompliance()
+        {
             if (!_userData.Data.Birthday.HasValue)
             {
                 try
                 {
 #if UNITY_EDITOR
                     var birthday = DateTime.Now;
-                    birthday -= TimeSpan.FromDays(600);
+                    birthday -= TimeSpan.FromDays(365*14);
 #elif UNITY_IOS || UNITY_ANDROID
                     var birthday = await NativeDialog
                         .OpenDatePickerAsync(
@@ -65,7 +69,7 @@ namespace Services
                 if (childTag != _userData.Data.CurrentTagForChildDirected)
                 {
                     //Set variable to admob
-                    _adService.SetTagForChildDirectedTreatment(childTag);
+                    await _adService.SetTagForChildDirectedTreatment(childTag);
                     _userData.Data.CurrentTagForChildDirected = childTag;
                     await _userData.Save();
                 }
