@@ -74,8 +74,6 @@ namespace pingak9
         /// <param name="time"></param>
         public void DateChangedEvent(string time)
         {
-            Debug.Log($"{typeof(MobileDateTimePicker)} DateChangedEvent");
-
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
 
@@ -88,8 +86,6 @@ namespace pingak9
 
         public void PickerClosedEvent(string time)
         {
-            Debug.Log($"{typeof(MobileDateTimePicker)} PickerClosedEvent");
-
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
 
@@ -105,7 +101,6 @@ namespace pingak9
         /// </summary>
         public void PickerDismissEvent(string data)
         {
-            Debug.Log($"{typeof(MobileDateTimePicker)} PickerDismissEvent");
             if (OnPickerDismiss != null)
             {
                 OnPickerDismiss();
