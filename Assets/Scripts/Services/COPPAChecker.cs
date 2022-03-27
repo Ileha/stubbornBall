@@ -48,9 +48,15 @@ namespace Services
                     
                     _userData.Data.Birthday = birthday;
                     await _userData.Save();
+#if DEBUG
+                    Debug.Log($"user birthday {birthday}");           
+#endif
                 }
                 catch(OperationCanceledException cancel)
                 {
+#if DEBUG
+                    Debug.Log($"users cancel");           
+#endif
                 }
             }
 
@@ -65,10 +71,17 @@ namespace Services
                 var childTag = years < Constants.COPPAComplianceAge
                     ? TagForChildDirectedTreatment.True
                     : TagForChildDirectedTreatment.Unspecified;
+                
+#if DEBUG
+                Debug.Log($"user full years: {years} => {childTag}");           
+#endif
 
                 if (childTag != _userData.Data.CurrentTagForChildDirected)
                 {
                     //Set variable to admob
+#if DEBUG
+                    Debug.Log($"set tag {childTag}");           
+#endif
                     await _adService.SetTagForChildDirectedTreatment(childTag);
                     _userData.Data.CurrentTagForChildDirected = childTag;
                     await _userData.Save();

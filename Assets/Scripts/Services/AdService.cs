@@ -63,7 +63,6 @@ namespace Services
         public async UniTask SetTagForChildDirectedTreatment(TagForChildDirectedTreatment tagForChildDirectedTreatment)
         {
 #if ShowAds
-	        Debug.Log($"{typeof(AdService)} SetTagForChildDirectedTreatment: {tagForChildDirectedTreatment}");
 #if UNITY_EDITOR
 			throw new NotImplementedException();
 #elif UNITY_IOS || UNITY_ANDROID
@@ -76,6 +75,8 @@ namespace Services
 		        .SetTagForChildDirectedTreatment(TagForChildDirectedTreatment.True)
 		        .build();
 	        MobileAds.SetRequestConfiguration(requestConfiguration);
+
+	        Debug.Log($"{typeof(AdService)} SetTagForChildDirectedTreatment: {tagForChildDirectedTreatment}");
 #endif
 #endif
         }
