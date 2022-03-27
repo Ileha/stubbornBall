@@ -27,7 +27,7 @@ public class MainUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private CanvasGroup _canvasGroup;
 
-    [Inject] private readonly SavesService _data;
+    [Inject] private readonly LevelsService _data;
     [Inject] private readonly AdService _adService;
     [Inject] private readonly LevelService levelService;
     private readonly IReactiveProperty<Page> _currentPage = new ReactiveProperty<Page>();
@@ -83,9 +83,9 @@ public class MainUI : MonoBehaviour
         _currentPage.Value = Settings;
     }
 
-    public Level[] GetAvailableLevels()
+    public async UniTask<Level[]> GetAvailableLevels()
     {
-        return _data.GetAllLevels();
+        return await _data.GetAllLevels();
     }
 
     public void LoadLevel(Level level)

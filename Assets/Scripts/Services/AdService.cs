@@ -60,6 +60,20 @@ namespace Services
 #endif
         }
 
+        public void SetTagForChildDirectedTreatment(TagForChildDirectedTreatment tagForChildDirectedTreatment)
+        {
+#if ShowAds
+#if UNITY_EDITOR
+	        Debug.Log($"set ChildDirectedTreatment: {tagForChildDirectedTreatment}");
+#elif UNITY_IOS || UNITY_ANDROID
+			RequestConfiguration requestConfiguration = new RequestConfiguration.Builder()
+		        .SetTagForChildDirectedTreatment(TagForChildDirectedTreatment.True)
+		        .build();
+	        MobileAds.SetRequestConfiguration(requestConfiguration);
+#endif
+#endif
+        }
+
         public bool IsLoaded()
         {
 #if ShowAds
@@ -102,7 +116,7 @@ namespace Services
 	        try
 	        {
 		        _interstitialAd?.Destroy();
-		        _interstitialAd = new InterstitialAd(_adData.Video);
+		        _interstitialAd = new InterstitialAd(_adData.VideoId);
 		        await new InterstitialAdLoading(_interstitialAd).Load(_adRequest);
 		        await ShowInterstitialAd(_interstitialAd);
 	        }
@@ -123,7 +137,7 @@ namespace Services
 	        try
 	        {
 		        _rewardedAd?.Destroy();
-		        _rewardedAd = new RewardedAd(_adData.RewardedVideo);
+		        _rewardedAd = new RewardedAd(_adData.RewardedVideoId);
 		        await new RewardedAdLoading(_rewardedAd).Load(_adRequest);
 		        var result = await ShowRewardedAd(_rewardedAd);
 		        return result;

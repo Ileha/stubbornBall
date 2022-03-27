@@ -53,7 +53,7 @@ public class PopupView : MonoBehaviour
 
     public void OnDatePicker()
     {
-        NativeDialog.OpenDatePicker(1992,5,10,
+        NativeDialog.OpenDatePicker(1992,5,10, true,
             (DateTime _date) =>
             {
                 DebugLog(_date.ToString());

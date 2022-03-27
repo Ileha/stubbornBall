@@ -16,6 +16,11 @@ public class CoreInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container
+            .BindInterfacesAndSelfTo<COPPAChecker>()
+            .AsSingle()
+            .NonLazy();
+        
+        Container
             .BindInstance(effectMixer)
             .WithId(GameAudioMixer.Effect)
             .NonLazy();
@@ -53,7 +58,7 @@ public class CoreInstaller : MonoInstaller
             .NonLazy();
         
         Container
-            .BindInterfacesAndSelfTo<SavesService>()
+            .BindInterfacesAndSelfTo<LevelsService>()
             .AsSingle()
             .NonLazy();
 

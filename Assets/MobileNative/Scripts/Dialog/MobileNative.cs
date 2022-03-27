@@ -79,7 +79,7 @@ namespace pingak9
 #endif
         }
 
-        public static void showDatePicker(int year, int month, int day)
+        public static void showDatePicker(int year, int month, int day, bool cancelable)
         {
 #if UNITY_EDITOR
 #elif UNITY_IPHONE
@@ -88,7 +88,17 @@ namespace pingak9
             _TAG_ShowDatePicker(2, unix);
 #elif UNITY_ANDROID
             AndroidJavaClass javaUnityClass = new AndroidJavaClass("com.pingak9.nativepopup.Bridge");
-            javaUnityClass.CallStatic("ShowDatePicker", year, month, day);
+            javaUnityClass.CallStatic("ShowDatePicker", year, month, day, cancelable);
+#endif
+        }
+        public static void showDatePicker(string message, int year, int month, int day, bool cancelable)
+        {
+#if UNITY_EDITOR
+#elif UNITY_IPHONE
+            throw new NotImplementedException("DatePicker with message is not implemented for iOS");
+#elif UNITY_ANDROID
+            AndroidJavaClass javaUnityClass = new AndroidJavaClass("com.pingak9.nativepopup.Bridge");
+            javaUnityClass.CallStatic("ShowDatePicker", message, year, month, day, cancelable);
 #endif
         }
         public static void showTimePicker()

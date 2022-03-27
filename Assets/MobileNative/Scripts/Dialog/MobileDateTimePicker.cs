@@ -19,14 +19,25 @@ namespace pingak9
 
         #region PUBLIC_FUNCTIONS
 
-        public static MobileDateTimePicker CreateDate(int year, int month, int day, Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+        public static MobileDateTimePicker CreateDate(int year, int month, int day, bool cancelable = true, Action<DateTime> onChange = null, Action<DateTime> onClose = null)
         {
             MobileDateTimePicker dialog;
             dialog = new GameObject("MobileDateTimePicker").AddComponent<MobileDateTimePicker>();
             dialog.OnDateChanged = onChange;
             dialog.OnPickerClosed = onClose;
 
-            MobileNative.showDatePicker(year, month, day);
+            MobileNative.showDatePicker(year, month, day, cancelable);
+            return dialog;
+        }
+        
+        public static MobileDateTimePicker CreateDate(string message, int year, int month, int day, bool cancelable = true, Action<DateTime> onChange = null, Action<DateTime> onClose = null)
+        {
+            MobileDateTimePicker dialog;
+            dialog = new GameObject("MobileDateTimePicker").AddComponent<MobileDateTimePicker>();
+            dialog.OnDateChanged = onChange;
+            dialog.OnPickerClosed = onClose;
+
+            MobileNative.showDatePicker(message, year, month, day, cancelable);
             return dialog;
         }
 
@@ -58,16 +69,24 @@ namespace pingak9
         {
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
+
             if (OnDateChanged!= null)
+            {
                 OnDateChanged(dt);
+                Destroy(GameObject.Find("MobileDateTimePicker")); //To destroy the respective gameobject
+            }
         }
 
         public void PickerClosedEvent(string time)
         {
             DateTime dt = DateTime.Parse(time);
             //DateTime dt = DateTime.ParseExact(time, formatDate, CultureInfo.InvariantCulture);
+
             if (OnPickerClosed != null)
+            {
                 OnPickerClosed(dt);
+                Destroy(GameObject.Find("MobileDateTimePicker")); //To destroy the respective gameobject
+            }
         }
     }
 }

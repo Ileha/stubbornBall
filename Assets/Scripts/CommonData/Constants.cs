@@ -5,6 +5,8 @@ namespace CommonData
 {
     public static class Constants
     {
+        public const int COPPAComplianceAge = 13;
+        
         #if AdsTest
         
         public static readonly List<string> DeviceIds = new List<string>()

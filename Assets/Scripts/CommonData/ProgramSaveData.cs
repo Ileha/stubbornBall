@@ -1,6 +1,14 @@
 using System;
 using System.Collections.Generic;
+using GoogleMobileAds.Api;
 using UnityEngine.SceneManagement;
+
+[Serializable]
+public class UserData
+{
+    public DateTime? Birthday;
+    public TagForChildDirectedTreatment CurrentTagForChildDirected = TagForChildDirectedTreatment.Unspecified;
+}
 
 [Serializable]
 public class ProgramSaveData 

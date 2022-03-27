@@ -1,3 +1,6 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Extensions;
 using Game.Goods.Abstract;
 using Services;
 using UniRx;
@@ -17,7 +20,9 @@ namespace Game.LevelComponents.UI
         {
             _adService
                 .AdsLoaded
-                .Subscribe(SetButtonAvailability)
+                .Select(adLoaded => RxExtensions.FromAsync(token => SetButtonAvailability(adLoaded, token)))
+                .Switch()
+                .Subscribe()
                 .AddTo(this);
 
             button
@@ -27,9 +32,9 @@ namespace Game.LevelComponents.UI
                 .AddTo(this);
         }
 
-        private void SetButtonAvailability(bool adLoaded)
+        private async UniTask SetButtonAvailability(bool adLoaded, CancellationToken token)
         {
-            gameObject.SetActive(adLoaded && levelDataModel.IsNextLevelAvailable);
+            gameObject.SetActive(adLoaded && await levelDataModel.IsNextLevelAvailable());
         }
     }
 }
