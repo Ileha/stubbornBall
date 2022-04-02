@@ -53,7 +53,7 @@ public class CoreInstaller : MonoInstaller
             .NonLazy();
         
         Container
-            .BindInterfacesAndSelfTo<SavesService>()
+            .BindInterfacesAndSelfTo<LevelsService>()
             .AsSingle()
             .NonLazy();
 

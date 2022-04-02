@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Extensions;
 using UniRx;
@@ -20,7 +21,8 @@ public class LevelsPage : Page
 
         CurrentPageState
             .Where(state => state == PageState.Open)
-            .Select(state => CreateViews())
+            .Select(state => RxExtensions.FromAsync(CreateViews))
+            .Switch()
             .CombineWithPrevious((previous, next) => (previous, next))
             .Select(combination => OnChangeLevelViews(combination.previous, combination.next))
             .Select(icon => RxExtensions.FromAsync(async token =>
@@ -37,9 +39,9 @@ public class LevelsPage : Page
             .AddTo(this);
     }
 
-    private IEnumerable<LevelIcon> CreateViews()
+    private async UniTask<IEnumerable<LevelIcon>> CreateViews(CancellationToken token)
     {
-        Level[] levels = MainUi.GetAvailableLevels();
+        Level[] levels = await MainUi.GetAvailableLevels().AttachExternalCancellation(token);
         var icons = new LevelIcon[levels.Length];
         for (int i = 0; i < levels.Length; i++)
         {

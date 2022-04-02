@@ -12,9 +12,9 @@ namespace Game.LevelComponents.UI
         [SerializeField]
         private Button button;
 
-        private void Awake()
+        private async void Awake()
         {
-            if (!levelDataModel.IsNextLevelAvailable)
+            if (!await levelDataModel.IsNextLevelAvailable())
             {
                 gameObject.SetActive(false);
                 return;

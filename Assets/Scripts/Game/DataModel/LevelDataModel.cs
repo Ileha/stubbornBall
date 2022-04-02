@@ -28,7 +28,6 @@ public class LevelDataModel : MonoBehaviour
 
     [Inject] public readonly MainCircle Cricle;
     public IReadOnlyReactiveProperty<int> StarCount => _starCount;
-    public bool IsNextLevelAvailable => HasNextLevel(out var next);
 
     private List<Iinput> InputSubscribers = new List<Iinput>();
     private List<RaycastResult> raycastResult = new List<RaycastResult>();
@@ -39,7 +38,7 @@ public class LevelDataModel : MonoBehaviour
     private GameState state = GameState.Draw;
     private IReactiveProperty<int> _starCount = new ReactiveProperty<int>();
 
-    [Inject] private readonly SavesService _data;
+    [Inject] private readonly LevelsService _data;
     [Inject] private readonly AdService _adService;
     [Inject] private readonly LevelService _levelService;
     [Inject] private readonly Level _level;
@@ -278,8 +277,8 @@ public class LevelDataModel : MonoBehaviour
                     { "passed", _level.passed }
                 }
             );
-
-            if (HasNextLevel(out var result))
+            
+            if (await IsNextLevelAvailable())
             {
                 _endOfLevel.gameObject.SetActive(true);
             }
@@ -301,23 +300,28 @@ public class LevelDataModel : MonoBehaviour
         }
     }
 
-    private bool HasNextLevel(out Level next)
+    public async UniTask<bool> IsNextLevelAvailable()
+    {
+        var nextLevel = await HasNextLevel();
+        return nextLevel != default;
+    }
+
+    private async UniTask<Level> HasNextLevel()
     {
         try
         {
-            next = _data.GetLevelInfo(_level.SceneNumber + 1);
-            return true;
+            return await _data.GetLevelInfo(_level.SceneNumber + 1);
         }
         catch (Exception err)
         {
-            next = null;
-            return false;
+            return default;
         }
     }
 
     public async void GoToNextLevel()
     {
-        if (HasNextLevel(out var nextLevel))
+        var nextLevel = await HasNextLevel();
+        if (nextLevel != default)
         {
             if (_adService.HasNextAd())
             {
@@ -352,9 +356,9 @@ public class LevelDataModel : MonoBehaviour
             return;
         }
 
-        void SetLevelPassed()
+        async UniTask SetLevelPassed()
         {
-            _data.SetLevelStar(_level, 0);
+            await _data.SetLevelStar(_level, 0);
             
             Analytics.CustomEvent(
                 Constants.LevelSkipped,
@@ -366,7 +370,8 @@ public class LevelDataModel : MonoBehaviour
                 }
             );
 
-            if (HasNextLevel(out var nextLevel))
+            var nextLevel = await HasNextLevel();
+            if (nextLevel != default)
             {
                 _levelService.SetLevel(nextLevel);
             }
@@ -375,13 +380,13 @@ public class LevelDataModel : MonoBehaviour
 
 #if UNITY_EDITOR
         
-        SetLevelPassed();
+        await SetLevelPassed();
         
 #elif UNITY_IOS || UNITY_ANDROID
 
         if (_adData.SkipLevelRewardIdentity.Equals(result.Type) && result.Amount > 0)
         {
-            SetLevelPassed();
+            await SetLevelPassed();
         }
 #endif
     }
