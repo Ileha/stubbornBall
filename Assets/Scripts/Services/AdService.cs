@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommonData;
 using Cysharp.Threading.Tasks;
@@ -9,6 +8,7 @@ using Interfaces;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using System.Linq;
 
 namespace Services
 {
@@ -36,7 +36,16 @@ namespace Services
 	        {
 		        _initializationStatus = status;
 
+#if DEBUG
+		        Debug.Log($"ads status:\n" +
+		                  $"{GetStatusString(status)}");       
+#endif
+
 		        _adsLoaded.Value = IsLoaded();
+
+#if DEBUG
+		        Debug.Log($"ads loaded: {_adsLoaded.Value}");
+#endif
 
 		        if (IsLoaded())
 		        {
@@ -63,7 +72,11 @@ namespace Services
         public bool IsLoaded()
         {
 #if ShowAds
-	        return _initializationStatus != null;
+	        return _initializationStatus != null 
+	               && _initializationStatus.getAdapterStatusMap().Count > 0 
+	               && _initializationStatus.getAdapterStatusMap()
+		               .Select(adapter => adapter.Value.InitializationState)
+		               .All(status => status == AdapterState.Ready);
 #else
 	        return false;
 #endif
@@ -426,5 +439,13 @@ namespace Services
 	    }
 	    
 	    #endregion
+	    
+	    private string GetStatusString(InitializationStatus status)
+	    {
+		    return String.Join("\n", status
+			    .getAdapterStatusMap()
+			    .Select(pair => $"{pair.Key}: {pair.Value.InitializationState}")
+		    );
+	    }
     }
 }
