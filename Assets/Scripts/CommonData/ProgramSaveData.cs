@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class UserData
 {
     public DateTime? Birthday;
-    public TagForChildDirectedTreatment CurrentTagForChildDirected = TagForChildDirectedTreatment.Unspecified;
 }
 
 [Serializable]

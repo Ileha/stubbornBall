@@ -9,6 +9,7 @@ using Interfaces;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using System.Linq;
 
 namespace Services
 {
@@ -19,6 +20,7 @@ namespace Services
 	    private int addCount = 0;
 
         [Inject] private readonly IAdData _adData;
+        [Inject] private readonly COPPAChecker _coppaChecker;
         private InitializationStatus _initializationStatus;
 
         private InterstitialAd _interstitialAd;
@@ -28,15 +30,26 @@ namespace Services
         private IReactiveProperty<bool> _adsLoaded = new ReactiveProperty<bool>(false);
         private TaskCompletionSource<object> _loadingCompletion = new TaskCompletionSource<object>();
         private Task AdsLoadingTask => _loadingCompletion.Task;
-        
-        public void Initialize()
+
+        public async void Initialize()
         {
+	        await _coppaChecker.IsCompleted;
+
 #if ShowAds
 			MobileAds.Initialize(status =>
 	        {
 		        _initializationStatus = status;
 
+#if DEBUG
+				Debug.Log($"ads status:\n" +
+				          $"{GetStatusString(status)}");       
+#endif
+
 		        _adsLoaded.Value = IsLoaded();
+
+#if DEBUG
+		        Debug.Log($"ads loaded: {_adsLoaded.Value}");
+#endif
 
 		        if (IsLoaded())
 		        {
@@ -64,13 +77,9 @@ namespace Services
         {
 #if ShowAds
 #if UNITY_EDITOR
-			throw new NotImplementedException();
+			throw new NotImplementedException($"installed tag: {tagForChildDirectedTreatment}");
 #elif UNITY_IOS || UNITY_ANDROID
-			await _adsLoaded
-		        .Where(loaded => loaded)
-		        .First()
-		        .ToUniTask();
-	        
+
 	        RequestConfiguration requestConfiguration = new RequestConfiguration.Builder()
 		        .SetTagForChildDirectedTreatment(TagForChildDirectedTreatment.True)
 		        .build();
@@ -84,7 +93,11 @@ namespace Services
         public bool IsLoaded()
         {
 #if ShowAds
-	        return _initializationStatus != null;
+	        return _initializationStatus != null 
+	               && _initializationStatus.getAdapterStatusMap().Count > 0 
+	               && _initializationStatus.getAdapterStatusMap()
+		               .Select(adapter => adapter.Value.InitializationState)
+		               .All(status => status == AdapterState.Ready);
 #else
 	        return false;
 #endif
@@ -447,5 +460,13 @@ namespace Services
 	    }
 	    
 	    #endregion
+
+	    private string GetStatusString(InitializationStatus status)
+	    {
+		    return String.Join("\n", status
+			    .getAdapterStatusMap()
+			    .Select(pair => $"{pair.Key}: {pair.Value.InitializationState}")
+		    );
+	    }
     }
 }
