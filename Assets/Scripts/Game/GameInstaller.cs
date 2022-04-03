@@ -1,11 +1,23 @@
 using IngameDebugConsole;
 using Services;
+using UnityEngine.EventSystems;
 using Zenject;
 
 public class GameInstaller : MonoInstaller
 {
     public override void InstallBindings()
     {
+        Container
+            .BindInterfacesAndSelfTo<EventSystemService>()
+            .AsSingle()
+            .NonLazy();
+        
+        Container
+            .Bind<EventSystem>()
+            .FromComponentInHierarchy()
+            .AsSingle()
+            .NonLazy();
+        
         Container
             .Bind<DebugLogManager>()
             .FromComponentInHierarchy()
